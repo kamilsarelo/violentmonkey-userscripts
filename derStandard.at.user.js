@@ -32,11 +32,11 @@ var timeStart = Date.now();
 
 var timerId = setTimeout(function clear() {
 	cls.forEach(function(cl) {
-	var els = document.getElementsByClassName(cl);
-	if (els.length > 0) {
-		els = Array.prototype.slice.call(els);
-		els.forEach((el) => { el.remove(); });
-	}
+		var els = document.getElementsByClassName(cl);
+		if (els.length > 0) {
+			els = Array.prototype.slice.call(els);
+			els.forEach((el) => { el.remove(); });
+		}
 	});
 
 	ids.forEach(function(id) {
