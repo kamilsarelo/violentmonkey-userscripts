@@ -16,7 +16,8 @@ var cls = [
 	"w-immosuche", // immobilien button oben
 	"w-jobsuche", // jobsuche button oben
 	"w-abo", // abo button oben
-	"ohne-box" // stellenanzeige und meistgelesen in der sidebar
+	"ohne-box", // stellenanzeige und meistgelesen in der sidebar
+	"socialsharing" // social mist unterhalb titel
 ];
 
 var ids = [
