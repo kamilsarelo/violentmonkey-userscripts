@@ -53,7 +53,9 @@ var timeDiff = Date.now() - timeStart;
 	} else if (timeDiff < 60 * 1000) {
 		timerId = setTimeout(clear, 1000);
 	} else if (timeDiff < 10 * 60 * 1000) {
-		timerId = setTimeout(clear, 4000);
+		timerId = setTimeout(clear, 5000);
+	} else {
+		timerId = setTimeout(clear, 10000);
 	}
 
 }, 500);
