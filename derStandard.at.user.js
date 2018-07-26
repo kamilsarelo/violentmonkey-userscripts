@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name       derStandard.at
-// @version    2.0.2
+// @version    2.0.3
 // @namespace  https://github.com/kamilsarelo
 // @author     kamilsarelo
 // @update     https://github.com/kamilsarelo/violentmonkey/raw/master/derStandard.at.user.js
@@ -17,7 +17,8 @@ var cls = [
 	"w-jobsuche", // jobsuche button oben
 	"w-abo", // abo button oben
 	"ohne-box", // stellenanzeige und meistgelesen in der sidebar
-	"socialsharing" // social mist unterhalb titel
+	"socialsharing", // social mist unterhalb titel
+	"communityform-input-textarea" // kommentarfeld
 ];
 
 var ids = [
@@ -26,7 +27,8 @@ var ids = [
 	"hint-push-service", // kurznachrichten link oben
 	"wetterWidget", // ...und weiterer müll daneben
 	"promotion-banner", // banner oben auf starseite
-	"articleTools" // müll zwischen artikel und kommentaren
+	"articleTools", // müll zwischen artikel und kommentaren
+	"toolbar" // untere sinnlose toolbar
 ]
 
 var timeStart = Date.now();
