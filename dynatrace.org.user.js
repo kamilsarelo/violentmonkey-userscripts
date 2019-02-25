@@ -9,3 +9,6 @@
 // @include    *://devops-rx.lab.dynatrace.org/*
 // @require    https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js
 // ==/UserScript==
+
+var instance = new Mark(document.querySelector(".context"));
+instance.mark("dashboard chart config filter");
