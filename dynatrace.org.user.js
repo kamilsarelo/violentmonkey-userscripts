@@ -10,5 +10,19 @@
 // @require    https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js
 // ==/UserScript==
 
-var instance = new Mark(document.querySelector(".context"));
-instance.mark("dashboard chart config filter");
+var timeStart = Date.now();
+var timerId = setTimeout(function mark() {
+	var timeDiff = Date.now() - timeStart;
+	if (timeDiff > 10 * 1000) {
+    return;
+  }
+
+  var markInstance = new Mark(document.querySelector(".overview-container"));
+  markInstance.mark("dashboard chart config filter");
+
+  var nodes = document.querySelectorAll('[data-markjs]') ;
+  if (nodes.length == 0) {
+    markInstance.unmark();
+    timerId = setTimeout(mark, 100);
+  }
+}, 100);
