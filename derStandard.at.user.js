@@ -4,7 +4,7 @@
 // @namespace  https://github.com/kamilsarelo
 // @author     kamilsarelo
 // @update     https://github.com/kamilsarelo/violentmonkey/raw/master/derStandard.at.user.js
-// @icon       https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/logo.png
+// @icon       https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/derStandard.at.logo.png
 // @grant      none
 // @include    *://derstandard.at/*
 // ==/UserScript==
