@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name       derStandard.at
-// @version    4
+// @version    5
 // @namespace  https://github.com/kamilsarelo
 // @author     kamilsarelo
 // @update     https://github.com/kamilsarelo/violentmonkey/raw/master/derStandard.at.user.js
@@ -18,7 +18,8 @@ var cls = [
 	"w-abo", // abo button oben
 	"ohne-box", // stellenanzeige und meistgelesen in der sidebar
 	"socialsharing", // social mist unterhalb titel
-	"communityform-input-textarea" // kommentarfeld
+	"communityform-input-textarea", // kommentarfeld
+	"lookup-links" // "Ihr Schlüssel zur neuen Immobilie..."
 ];
 
 var ids = [
