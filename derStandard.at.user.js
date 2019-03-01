@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name       derStandard.at
-// @version    6
+// @version    7
 // @namespace  https://github.com/kamilsarelo
 // @author     kamilsarelo
 // @update     https://github.com/kamilsarelo/violentmonkey/raw/master/derStandard.at.user.js
@@ -51,13 +51,11 @@ var timerId = setTimeout(function clear() {
 	});
 
 	var timeDiff = Date.now() - timeStart;
-	if (timeDiff < 10 * 1000) {
+	if (timeDiff < 5 * 60 * 1000) {
 		timerId = setTimeout(clear, 250);
-	} else if (timeDiff < 60 * 1000) {
-		timerId = setTimeout(clear, 500);
-	} else if (timeDiff < 10 * 60 * 1000) {
+	} else if (timeDiff < 30 * 60 * 1000) {
 		timerId = setTimeout(clear, 1000);
 	} else {
-		timerId = setTimeout(clear, 2500);
+		timerId = setTimeout(clear, 5000);
 	}
-}, 500);
+}, 250);
