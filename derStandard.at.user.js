@@ -19,7 +19,8 @@ var cls = [
 	"ohne-box", // stellenanzeige und meistgelesen in der sidebar
 	"socialsharing", // social mist unterhalb titel
 	"communityform-input-textarea", // kommentarfeld
-	"lookup-links" // "Ihr Schlüssel zur neuen Immobilie..."
+	"lookup-links", // "Ihr Schlüssel zur neuen Immobilie..."
+	"newsletter-widget" // newsletter widget
 ];
 
 var ids = [
