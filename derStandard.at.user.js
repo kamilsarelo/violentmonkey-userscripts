@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name       derStandard.at
-// @version    11
+// @version    12
 // @namespace  https://github.com/kamilsarelo
 // @author     kamilsarelo
 // @update     https://github.com/kamilsarelo/violentmonkey/raw/master/derStandard.at.user.js
@@ -67,7 +67,7 @@ var timerId = setTimeout(function clear() {
 
 	var timeDiff = Date.now() - timeStart;
 	if (timeDiff < 5 * 10 * 1000) {
-		timerId = setTimeout(clear, 250);
+		timerId = setTimeout(clear, 100);
 	} else if (timeDiff < 30 * 60 * 1000) {
 		timerId = setTimeout(clear, 1000);
 	} else {
