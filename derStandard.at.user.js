@@ -35,7 +35,7 @@ var ids = [
 
 var timeStart = Date.now();
 var timerId = setTimeout(function clear() {
-	var paywall = node.querySelector("#purwall");
+	var paywall = document.querySelector("#purwall");
 	if (paywall != null) {
 		var success = document.querySelector("#page_success");
 		if (success != null) {
