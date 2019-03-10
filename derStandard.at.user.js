@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name       derStandard.at
-// @version    16
+// @version    17
 // @namespace  https://github.com/kamilsarelo
 // @author     kamilsarelo
 // @update     https://github.com/kamilsarelo/violentmonkey/raw/master/derStandard.at.user.js
@@ -41,10 +41,9 @@ var timerId = setTimeout(function clear() {
 		if (success != null) {
 			var aList = success.getElementsByTagName("a");
 			if (aList.length > 0) {
-				function forward() {
+				setTimeout(function() {
 					aList[0].click();
-				}
-				setTimeout(forward, 3 * 1000);
+				}, 2 * 1000);
 				return;
 			}
 		}
