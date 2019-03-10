@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name       derStandard.at
-// @version    13
+// @version    14
 // @namespace  https://github.com/kamilsarelo
 // @author     kamilsarelo
 // @update     https://github.com/kamilsarelo/violentmonkey/raw/master/derStandard.at.user.js
@@ -37,18 +37,18 @@ var timeStart = Date.now();
 var timerId = setTimeout(function clear() {
 	var paywall = document.querySelector("#purwall");
 	if (paywall != null) {
-		/*
 		var success = document.querySelector("#page_success");
 		if (success != null) {
 			var aList = success.getElementsByTagName("a");
 			if (aList.length > 0) {
+				var e = new Date().getTime() + (1 * 1000);
+				while (new Date().getTime() <= e) {} // Thread.sleep()
 				aList[0].click();
-				//timerId = setTimeout(clear, 1000);
-				//return;
+				timerId = setTimeout(clear, 100);
+				return;
 			}
 		}
-		*/
-		timerId = setTimeout(clear, 500);
+		timerId = setTimeout(clear, 100);
 		return;
 	}
 	
