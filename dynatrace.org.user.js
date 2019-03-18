@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name       dynatrace.org
-// @version    3
+// @version    4
 // @namespace  https://github.com/kamilsarelo
 // @author     kamilsarelo
 // @update     https://github.com/kamilsarelo/violentmonkey/raw/master/dynatrace.org.user.js
