@@ -18,7 +18,7 @@ var timerId = setTimeout(function mark() {
   }
 
   var markInstance = new Mark(document.querySelector(".overview-container"));
-  markInstance.mark("dashboard chart config filter promise");
+  markInstance.mark("dashboard chart config filter promise report");
 
   var nodes = document.querySelectorAll('[data-markjs]') ;
   if (nodes.length == 0) {
