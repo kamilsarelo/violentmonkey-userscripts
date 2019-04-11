@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name       dynatrace.org
-// @version    4
+// @version    5
 // @namespace  https://github.com/kamilsarelo
 // @author     kamilsarelo
 // @update     https://github.com/kamilsarelo/violentmonkey/raw/master/dynatrace.org.user.js
@@ -18,7 +18,7 @@ var timerId = setTimeout(function mark() {
   }
 
   var markInstance = new Mark(document.querySelector(".overview-container"));
-  markInstance.mark("dashboard chart config filter promise report");
+  markInstance.mark("dashboard chart config filter promise report ClientSideRuntimeException");
 
   var nodes = document.querySelectorAll('[data-markjs]') ;
   if (nodes.length == 0) {
