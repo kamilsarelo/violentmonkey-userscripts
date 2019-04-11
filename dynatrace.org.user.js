@@ -18,7 +18,7 @@ var timerId = setTimeout(function mark() {
   }
 
   var markInstance = new Mark(document.querySelector(".overview-container"));
-  markInstance.mark("dashboard chart config filter promise report ClientSideRuntimeException NullPointerException");
+  markInstance.mark("dashboard chart config filter promise report ClientLoggingServiceImpl ClientSideRuntimeException NullPointerException");
 
   var nodes = document.querySelectorAll('[data-markjs]') ;
   if (nodes.length == 0) {
