@@ -1,37 +1,29 @@
 // ==UserScript==
 // @name       derStandard.at
-// @version    18
+// @version    19
 // @namespace  https://github.com/kamilsarelo
 // @author     kamilsarelo
 // @update     https://github.com/kamilsarelo/violentmonkey/raw/master/derStandard.at.user.js
 // @icon       https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/derStandard.at.logo.png
 // @grant      none
 // @include    *://derstandard.at/*
+// @include    *://www.derstandard.at/*
 // ==/UserScript==
 
-var cls = [
-	"ContentAd1",
-	"ad-std",
-	"TopEW",
-	"w-immosuche", // immobilien button oben
-	"w-jobsuche", // jobsuche button oben
-	"w-abo", // abo button oben
-	"ohne-box", // stellenanzeige und meistgelesen in der sidebar
-	"socialsharing", // social mist unterhalb titel
-	"communityform-input-textarea", // kommentarfeld
-	"lookup-links", // "Ihr Schlüssel zur neuen Immobilie..."
-	"newsletter-widget" // newsletter widget
+setInterval(function(){
+  let navbar = document.querySelector("#vue-header-app");
+  if (navbar) { 
+    navbar.classList.remove("compact");
+  }
+}, 50);
+
+const cls = [
+  "tile-ad", // front page top banner
+  "usabilla_live_button_container", // new design feedback button right
+  "ad-container-used", // sidebar ads
 ];
 
-var ids = [
-	"dynamicCharts", // stock charts
-	"looptool", // immobilien oder jobs unterhalb der kommentare
-	"hint-push-service", // kurznachrichten link oben
-	"wetterWidget", // ...und weiterer müll daneben
-	"promotion-banner", // banner oben auf starseite
-	"articleTools", // müll zwischen artikel und kommentaren
-	"toolbar" // untere sinnlose toolbar
-]
+var ids = [];
 
 var timeStart = Date.now();
 var timerId = setTimeout(function clear() {
