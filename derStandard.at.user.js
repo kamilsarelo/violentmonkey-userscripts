@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name       derStandard.at
-// @version    19
+// @version    20
 // @namespace  https://github.com/kamilsarelo
 // @author     kamilsarelo
 // @update     https://github.com/kamilsarelo/violentmonkey/raw/master/derStandard.at.user.js
@@ -21,6 +21,7 @@ const cls = [
   "tile-ad", // front page top banner
   "usabilla_live_button_container", // new design feedback button right
   "ad-container-used", // sidebar ads
+  "native-ad", // ads separating articles
 ];
 
 var ids = [];
