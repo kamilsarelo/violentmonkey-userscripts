@@ -24,7 +24,9 @@ const cls = [
   "native-ad", // ads separating articles
 ];
 
-var ids = [];
+var ids = [
+	"piano-supporter-inline-container", // Mit Ihrem Beitrag sichern Sie unsere Live-Berichte!
+];
 
 var timeStart = Date.now();
 var timerId = setTimeout(function clear() {
