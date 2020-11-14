@@ -11,21 +11,22 @@
 // ==/UserScript==
 
 setInterval(function(){
-  let navbar = document.querySelector("#vue-header-app");
-  if (navbar) { 
-    navbar.classList.remove("compact");
-  }
+	let navbar = document.querySelector("#vue-header-app");
+	if (navbar) { 
+		navbar.classList.remove("compact");
+	}
 }, 50);
 
 const cls = [
-  "tile-ad", // front page top banner
-  "usabilla_live_button_container", // new design feedback button right
-  "ad-container-used", // sidebar ads
-  "native-ad", // ads separating articles
+	"tile-ad", // front page top banner
+	"usabilla_live_button_container", // new design feedback button right
+	"ad-container-used", // sidebar ads
+	"native-ad", // ads separating articles
 ];
 
 var ids = [
 	"piano-supporter-inline-container", // Mit Ihrem Beitrag sichern Sie unsere Live-Berichte!
+	"piano-pur-container", // Alle PUR-Vorteile plus die STANDARD Wochenendausgabe
 ];
 
 var timeStart = Date.now();
