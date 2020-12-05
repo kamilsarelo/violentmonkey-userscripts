@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name       YouTube continue watching
-// @version    1
+// @version    2
 // @namespace  https://github.com/kamilsarelo
 // @author     kamilsarelo
 // @update     https://github.com/kamilsarelo/violentmonkey/raw/master/YouTube.user.js
@@ -19,6 +19,7 @@ setInterval(function() {
       let elementAnchor = elementMain.querySelector('a');
       if (elementAnchor != null) {
         elementAnchor.click();
+        elementMain.remove();
       }
     }
   });
