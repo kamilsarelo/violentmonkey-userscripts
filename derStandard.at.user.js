@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name       derStandard.at
-// @version    23
+// @version    24
 // @namespace  https://github.com/kamilsarelo
 // @author     kamilsarelo
 // @update     https://github.com/kamilsarelo/violentmonkey/raw/master/derStandard.at.user.js
@@ -28,6 +28,7 @@ var ids = [
 	"piano-supporter-inline-container", // Mit Ihrem Beitrag sichern Sie unsere Live-Berichte!
 	"piano-pur-container", // Alle PUR-Vorteile plus die STANDARD Wochenendausgabe
 	"piano-supporter-container", // Gemeinsam Qualitätsjournalismus unterstützen
+	"piano-limesurvey-container", // STANDARD-Umfrage
 ];
 
 var timeStart = Date.now();
