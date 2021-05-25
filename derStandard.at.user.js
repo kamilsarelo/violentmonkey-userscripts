@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name       derStandard.at
-// @version    24
+// @version    25
 // @namespace  https://github.com/kamilsarelo
 // @author     kamilsarelo
 // @update     https://github.com/kamilsarelo/violentmonkey/raw/master/derStandard.at.user.js
@@ -22,6 +22,7 @@ const cls = [
 	"usabilla_live_button_container", // new design feedback button right
 	"ad-container-used", // sidebar ads
 	"native-ad", // ads separating articles
+	"dstpiano-container", // PUR + Wochenende banner
 ];
 
 var ids = [
