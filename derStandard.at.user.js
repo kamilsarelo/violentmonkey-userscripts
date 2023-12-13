@@ -23,6 +23,8 @@ const cls = [
 	"ad-container-used", // sidebar ads
 	"native-ad", // ads separating articles
 	"dstpiano-container", // PUR + Wochenende banner
+	"tp-modal", // AdBlocker warning + subscription advertisement
+	"tp-backdrop", // ...full page blurry blocker related to the warning above
 ];
 
 var ids = [
