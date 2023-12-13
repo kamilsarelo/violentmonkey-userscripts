@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name       derStandard.at
-// @version    25
+// @version    26
 // @namespace  https://github.com/kamilsarelo
 // @author     kamilsarelo
 // @update     https://github.com/kamilsarelo/violentmonkey/raw/master/derStandard.at.user.js
