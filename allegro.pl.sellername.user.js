@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name       allegro.pl
 // @namespace  https://github.com/kamilsarelo
-// @version    1
+// @version    2
 // @author     kamilsarelo
 // @update     https://github.com/kamilsarelo/violentmonkey/raw/master/allegro.pl.sellername.user.js
 // @icon       https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
@@ -10,15 +10,6 @@
 // @include    *://www.allegro.pl/*
 // @include    *://allegro.com/*
 // @include    *://www.allegro.com/*
-// ==/UserScript==
-
-// ==UserScript==
-// @name         Allegro Seller Name Replacement
-// @namespace    http://tampermonkey.net/
-// @version      1.0
-// @description  Replace "Firma" with actual seller name on Allegro search results
-// @match        https://allegro.pl/listing*
-// @grant        none
 // ==/UserScript==
 
 (function() {
@@ -85,14 +76,19 @@
     function waitForPageLoad() {
         console.log('Waiting for page to fully load...');
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initScript);
+            document.addEventListener('DOMContentLoaded', delayedInit);
         } else {
-            initScript();
+            delayedInit();
         }
     }
 
+    function delayedInit() {
+        console.log('Page loaded, waiting 3 seconds before initializing script...');
+        setTimeout(initScript, 3000);  // 3000 milliseconds = 3 seconds
+    }
+
     function initScript() {
-        console.log('Page loaded, initializing script...');
+        console.log('Initializing script...');
         const jsonData = extractJsonData();
         if (jsonData) {
             replaceSellerName(jsonData);
