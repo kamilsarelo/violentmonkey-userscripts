@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name       allegro.pl
 // @namespace  https://github.com/kamilsarelo
-// @version    2
+// @version    3
 // @author     kamilsarelo
 // @update     https://github.com/kamilsarelo/violentmonkey/raw/master/allegro.pl.sellername.user.js
 // @icon       https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
@@ -83,8 +83,8 @@
     }
 
     function delayedInit() {
-        console.log('Page loaded, waiting 3 seconds before initializing script...');
-        setTimeout(initScript, 3000);  // 3000 milliseconds = 3 seconds
+        console.log('Page loaded, waiting before initializing script...');
+        setTimeout(initScript, 1000);
     }
 
     function initScript() {
