@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name       allegro.pl-seller-name
+// @name       allegro.pl
 // @namespace  https://github.com/kamilsarelo
 // @version    1
 // @author     kamilsarelo
