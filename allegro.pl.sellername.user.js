@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name       allegro.pl
 // @namespace  https://github.com/kamilsarelo
-// @version    3
+// @version    4
 // @author     kamilsarelo
 // @update     https://github.com/kamilsarelo/violentmonkey/raw/master/allegro.pl.sellername.user.js
 // @icon       https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
@@ -53,14 +53,15 @@
                 
                 if (articleElement) {
                     console.log('Matching article element found');
-                    const firmaElement = articleElement.closest('article').querySelector('span.mpof_z0.mgmw_3z.mgn2_12._6a66d_gjNQR');
+                    const sellerElement = articleElement.closest('article').querySelector('span.mpof_z0.mgmw_3z.mgn2_12._6a66d_gjNQR');
                     
-                    if (firmaElement && firmaElement.textContent.trim() === 'Firma') {
-                        firmaElement.textContent = sellerName;
-                        console.log(`Replaced "Firma" with "${sellerName}" for URL: ${item.url}`);
+                    if (sellerElement) {
+                        const originalText = sellerElement.textContent.trim();
+                        sellerElement.textContent = sellerName;
+                        console.log(`Replaced "${originalText}" with "${sellerName}" for URL: ${item.url}`);
                         replacementCount++;
                     } else {
-                        console.log('No "Firma" text found in the article or already replaced');
+                        console.log('No seller label element found in the article');
                     }
                 } else {
                     console.log('No matching article element found');
@@ -83,7 +84,7 @@
     }
 
     function delayedInit() {
-        console.log('Page loaded, waiting before initializing script...');
+        console.log('Page loaded, waiting 3 seconds before initializing script...');
         setTimeout(initScript, 1000);
     }
 
