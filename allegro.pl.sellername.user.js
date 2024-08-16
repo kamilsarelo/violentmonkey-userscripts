@@ -12,55 +12,95 @@
 // @include    *://www.allegro.com/*
 // ==/UserScript==
 
+// ==UserScript==
+// @name         Allegro Seller Name Replacement
+// @namespace    http://tampermonkey.net/
+// @version      1.0
+// @description  Replace "Firma" with actual seller name on Allegro search results
+// @match        https://allegro.pl/listing*
+// @grant        none
+// ==/UserScript==
+
 (function() {
     'use strict';
 
-    // Function to extract JSON data from script tag
     function extractJsonData() {
-        const scripts = document.getElementsByTagName('script');
-        for (let script of scripts) {
-            if (script.type === 'application/json' && script.getAttribute('data-serialize-box-id')) {
-                try {
-                    return JSON.parse(script.textContent);
-                } catch (e) {
-                    console.error('Error parsing JSON:', e);
-                }
+        console.log('Attempting to extract JSON data...');
+        const script = document.querySelector('script[data-serialize-box-id="q3sWcOVSTx268bHXp9P4Fw=="]');
+        if (script) {
+            try {
+                const data = JSON.parse(script.textContent);
+                console.log('JSON data extracted successfully');
+                return data;
+            } catch (e) {
+                console.error('Error parsing JSON:', e);
             }
+        } else {
+            console.log('Script tag with specified data-serialize-box-id not found');
         }
         return null;
     }
 
-    // Function to replace "Firma" with seller name
     function replaceSellerName(jsonData) {
-        if (!jsonData || !jsonData.__listing_StoreState || !jsonData.__listing_StoreState.items) return;
+        console.log('Starting seller name replacement process...');
+        if (!jsonData || !jsonData.__listing_StoreState || !jsonData.__listing_StoreState.items) {
+            console.log('Required JSON data not found');
+            return;
+        }
 
         const items = jsonData.__listing_StoreState.items.elements;
-        const currentUrl = window.location.href;
+        console.log(`Found ${items.length} items in JSON data`);
 
-        for (let item of items) {
-            if (item.url === currentUrl && item.seller && item.seller.login) {
+        let replacementCount = 0;
+
+        items.forEach((item, index) => {
+            console.log(`Processing item ${index + 1}/${items.length}`);
+            if (item.url && item.seller && item.seller.login) {
                 const sellerName = item.seller.login;
-                const firmaElements = document.querySelectorAll('span.mpof_z0.mgmw_3z.mgn2_12._6a66d_gjNQR');
+                console.log(`Searching for article with URL: ${item.url}`);
+                const articleElement = document.querySelector(`article a[href="${item.url}"]`);
                 
-                firmaElements.forEach(element => {
-                    if (element.textContent.trim() === 'Firma') {
-                        element.textContent = sellerName;
+                if (articleElement) {
+                    console.log('Matching article element found');
+                    const firmaElement = articleElement.closest('article').querySelector('span.mpof_z0.mgmw_3z.mgn2_12._6a66d_gjNQR');
+                    
+                    if (firmaElement && firmaElement.textContent.trim() === 'Firma') {
+                        firmaElement.textContent = sellerName;
+                        console.log(`Replaced "Firma" with "${sellerName}" for URL: ${item.url}`);
+                        replacementCount++;
+                    } else {
+                        console.log('No "Firma" text found in the article or already replaced');
                     }
-                });
-
-                break;
+                } else {
+                    console.log('No matching article element found');
+                }
+            } else {
+                console.log('Item does not have required properties (url, seller.login)');
             }
+        });
+
+        console.log(`Replacement process completed. Total replacements: ${replacementCount}`);
+    }
+
+    function waitForPageLoad() {
+        console.log('Waiting for page to fully load...');
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initScript);
+        } else {
+            initScript();
         }
     }
 
-    // Main execution
-    const jsonData = extractJsonData();
-    if (jsonData) {
-        // Wait for the DOM to be fully loaded
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => replaceSellerName(jsonData));
-        } else {
+    function initScript() {
+        console.log('Page loaded, initializing script...');
+        const jsonData = extractJsonData();
+        if (jsonData) {
             replaceSellerName(jsonData);
+        } else {
+            console.log('Failed to extract JSON data, script execution halted');
         }
     }
+
+    // Start the script
+    waitForPageLoad();
 })();
