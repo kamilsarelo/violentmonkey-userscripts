@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name       allegro.pl
 // @namespace  https://github.com/kamilsarelo
-// @version    2
+// @version    2.0
 // @author     kamilsarelo
 // @update     https://github.com/kamilsarelo/violentmonkey/raw/master/allegro.pl.sellername.user.js
 // @icon       https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
