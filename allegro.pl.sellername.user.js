@@ -1,7 +1,8 @@
 // ==UserScript==
-// @name       allegro.pl
+// @name         Allegro Seller Name Replacement (Periodic Execution)
+// @description  Replace seller type labels with actual seller names on Allegro search results, running periodically
 // @namespace  https://github.com/kamilsarelo
-// @version    5
+// @version    6
 // @author     kamilsarelo
 // @update     https://github.com/kamilsarelo/violentmonkey/raw/master/allegro.pl.sellername.user.js
 // @icon       https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
@@ -14,6 +15,10 @@
 
 (function() {
     'use strict';
+
+    // Configuration constants
+    const INITIAL_DELAY_MS = 1000;
+    const PERIODIC_DELAY_MS = 1000;
 
     function extractJsonData() {
         console.log('Attempting to extract JSON data...');
@@ -45,47 +50,24 @@
         let replacementCount = 0;
 
         items.forEach((item, index) => {
-            console.log(`Processing item ${index + 1}/${items.length}`);
             if (item.url && item.seller && item.seller.login) {
                 const sellerName = item.seller.login;
-                console.log(`Searching for article with URL: ${item.url}`);
                 const articleElement = document.querySelector(`article a[href="${item.url}"]`);
                 
                 if (articleElement) {
-                    console.log('Matching article element found');
                     const sellerElement = articleElement.closest('article').querySelector('span.mpof_z0.mgmw_3z.mgn2_12._6a66d_gjNQR');
                     
-                    if (sellerElement) {
+                    if (sellerElement && sellerElement.textContent.trim() !== sellerName) {
                         const originalText = sellerElement.textContent.trim();
                         sellerElement.textContent = sellerName;
                         console.log(`Replaced "${originalText}" with "${sellerName}" for URL: ${item.url}`);
                         replacementCount++;
-                    } else {
-                        console.log('No seller label element found in the article');
                     }
-                } else {
-                    console.log('No matching article element found');
                 }
-            } else {
-                console.log('Item does not have required properties (url, seller.login)');
             }
         });
 
         console.log(`Replacement process completed. Total replacements: ${replacementCount}`);
-    }
-
-    function waitForPageLoad() {
-        console.log('Waiting for page to fully load...');
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', delayedInit);
-        } else {
-            delayedInit();
-        }
-    }
-
-    function delayedInit() {
-        console.log('Page loaded, waiting 3 seconds before initializing script...');
-        setTimeout(initScript, 3333);
     }
 
     function initScript() {
@@ -95,6 +77,20 @@
             replaceSellerName(jsonData);
         } else {
             console.log('Failed to extract JSON data, script execution halted');
+        }
+    }
+
+    function startPeriodicExecution() {
+        console.log(`Starting periodic execution every ${PERIODIC_DELAY_MS}ms`);
+        setInterval(initScript, PERIODIC_DELAY_MS);
+    }
+
+    function waitForPageLoad() {
+        console.log('Waiting for page to fully load...');
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => setTimeout(startPeriodicExecution, INITIAL_DELAY_MS));
+        } else {
+            setTimeout(startPeriodicExecution, INITIAL_DELAY_MS);
         }
     }
 
