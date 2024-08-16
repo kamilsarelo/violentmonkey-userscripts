@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name       allegro.pl
 // @namespace  https://github.com/kamilsarelo
-// @version    4
+// @version    5
 // @author     kamilsarelo
 // @update     https://github.com/kamilsarelo/violentmonkey/raw/master/allegro.pl.sellername.user.js
 // @icon       https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
@@ -85,7 +85,7 @@
 
     function delayedInit() {
         console.log('Page loaded, waiting 3 seconds before initializing script...');
-        setTimeout(initScript, 1000);
+        setTimeout(initScript, 3333);
     }
 
     function initScript() {
