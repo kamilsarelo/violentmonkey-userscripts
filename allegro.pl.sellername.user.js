@@ -1,25 +1,25 @@
 // ==UserScript==
-// @name         Allegro Seller Name Replacement (Periodic Execution)
+// @name         Allegro Seller Name Replacement
 // @description  Replace seller type labels with actual seller names on Allegro search results, running periodically
-// @namespace  https://github.com/kamilsarelo
-// @version    7
-// @author     kamilsarelo
-// @update     https://github.com/kamilsarelo/violentmonkey/raw/master/allegro.pl.sellername.user.js
-// @icon       https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
-// @grant      none
-// @include    *://allegro.pl/*
-// @include    *://www.allegro.pl/*
-// @include    *://allegro.com/*
-// @include    *://www.allegro.com/*
+// @namespace    https://github.com/kamilsarelo
+// @version      8
+// @author       kamilsarelo
+// @update       https://github.com/kamilsarelo/violentmonkey/raw/master/allegro.pl.sellername.user.js
+// @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
+// @grant        none
+// @include      *://allegro.pl/*
+// @include      *://www.allegro.pl/*
+// @include      *://allegro.com/*
+// @include      *://www.allegro.com/*
 // ==/UserScript==
 
 (function() {
     'use strict';
 
     // Configuration constants
-    const INITIAL_DELAY_MS = 1000; // 1 second
-    const PERIODIC_DELAY_MS = 1000; // 1 second
-    const ENABLE_LOGGING = false; // Set to true to enable logging
+    const INITIAL_DELAY_MS = 1000; // 3 seconds
+    const PERIODIC_DELAY_MS = 1000; // 5 seconds
+    const ENABLE_LOGGING = true; // Set to true to enable logging
 
     function log(...args) {
         if (ENABLE_LOGGING) {
@@ -29,18 +29,19 @@
 
     function extractJsonData() {
         log('Attempting to extract JSON data...');
-        const script = document.querySelector('script[data-serialize-box-id="q3sWcOVSTx268bHXp9P4Fw=="]');
-        if (script) {
-            try {
-                const data = JSON.parse(script.textContent);
-                log('JSON data extracted successfully');
-                return data;
-            } catch (e) {
-                console.error('Error parsing JSON:', e);
+        const scripts = document.querySelectorAll('script[type="application/json"][data-serialize-box-id]');
+        for (const script of scripts) {
+            if (script.textContent.includes('"listingType":"gallery"')) {
+                try {
+                    const data = JSON.parse(script.textContent);
+                    log('JSON data extracted successfully');
+                    return data;
+                } catch (e) {
+                    console.error('Error parsing JSON:', e);
+                }
             }
-        } else {
-            log('Script tag with specified data-serialize-box-id not found');
         }
+        log('No matching script tag found');
         return null;
     }
 
@@ -56,13 +57,15 @@
 
         let replacementCount = 0;
 
-        items.forEach((item) => {
+        items.forEach((item, index) => {
             if (item.url && item.seller && item.seller.login) {
                 const sellerName = item.seller.login;
+                log(`Searching for article with URL: ${item.url}`);
                 const articleElement = document.querySelector(`article a[href="${item.url}"]`);
                 
                 if (articleElement) {
-                    const sellerElement = articleElement.closest('article').querySelector('span.mpof_z0.mgmw_3z.mgn2_12._6a66d_gjNQR');
+                    // Find the seller element using a more robust selector
+                    const sellerElement = articleElement.closest('article').querySelector('div[class*="mqu1_"] > span[class*="mpof_"]');
                     
                     if (sellerElement && sellerElement.textContent.trim() !== sellerName) {
                         const originalText = sellerElement.textContent.trim();
