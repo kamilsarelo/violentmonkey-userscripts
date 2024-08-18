@@ -2,7 +2,7 @@
 // @name         Allegro Seller Name Replacement
 // @description  Replace seller type labels with actual seller names on Allegro search results, running periodically
 // @namespace    https://github.com/kamilsarelo
-// @version      11
+// @version      12
 // @author       kamilsarelo
 // @update       https://github.com/kamilsarelo/violentmonkey/raw/master/allegro.pl.sellername.user.js
 // @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
@@ -90,11 +90,21 @@
                     // Find the seller element using a more robust selector
                     const sellerElement = articleElement.closest('article').querySelector('div[class*="mqu1_"] > span[class*="mpof_"]');
                     
-                    if (sellerElement && sellerElement.textContent.trim() !== displayText) {
-                        const originalText = sellerElement.textContent.trim();
-                        sellerElement.innerHTML = `<span class="highlighted-seller">${displayText}</span>`;
-                        log(`Replaced "${originalText}" with "${displayText}" for URL: ${item.url}`);
-                        replacementCount++;
+                    if (sellerElement) {
+                        const highlightedSpan = sellerElement.querySelector('.highlighted-seller');
+                        if (highlightedSpan) {
+                            // If the highlighted span already exists, just update its text content if different
+                            if (highlightedSpan.textContent !== displayText) {
+                                highlightedSpan.textContent = displayText;
+                                log(`Updated existing span with "${displayText}" for URL: ${item.url}`);
+                                replacementCount++;
+                            }
+                        } else {
+                            // If the highlighted span doesn't exist, create it
+                            sellerElement.innerHTML = `<span class="highlighted-seller">${displayText}</span>`;
+                            log(`Created new span with "${displayText}" for URL: ${item.url}`);
+                            replacementCount++;
+                        }
                     }
                 }
             }
@@ -113,9 +123,19 @@
         }
     }
 
+    let executionCount = 0;
+    const MAX_EXECUTIONS = 30; // Stop after 30 seconds (30 executions at 1-second intervals)
+
     function startPeriodicExecution() {
         log(`Starting periodic execution every ${PERIODIC_DELAY_MS}ms`);
-        setInterval(initScript, PERIODIC_DELAY_MS);
+        const intervalId = setInterval(() => {
+            initScript();
+            executionCount++;
+            if (executionCount >= MAX_EXECUTIONS) {
+                clearInterval(intervalId);
+                log('Reached maximum number of executions. Stopping periodic updates.');
+            }
+        }, PERIODIC_DELAY_MS);
     }
 
     function waitForPageLoad() {
