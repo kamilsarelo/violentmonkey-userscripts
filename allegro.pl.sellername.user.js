@@ -2,7 +2,7 @@
 // @name         Allegro Seller Name Replacement
 // @description  Replace seller type labels with actual seller names on Allegro search results, running periodically
 // @namespace    https://github.com/kamilsarelo
-// @version      8
+// @version      9
 // @author       kamilsarelo
 // @update       https://github.com/kamilsarelo/violentmonkey/raw/master/allegro.pl.sellername.user.js
 // @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
@@ -17,8 +17,8 @@
     'use strict';
 
     // Configuration constants
-    const INITIAL_DELAY_MS = 1000; // 3 seconds
-    const PERIODIC_DELAY_MS = 1000; // 5 seconds
+    const INITIAL_DELAY_MS = 1000; // 1 second
+    const PERIODIC_DELAY_MS = 1000; // 1 second
     const ENABLE_LOGGING = true; // Set to true to enable logging
 
     function log(...args) {
@@ -31,14 +31,14 @@
         log('Attempting to extract JSON data...');
         const scripts = document.querySelectorAll('script[type="application/json"][data-serialize-box-id]');
         for (const script of scripts) {
-            if (script.textContent.includes('"listingType":"gallery"')) {
-                try {
-                    const data = JSON.parse(script.textContent);
+            try {
+                const data = JSON.parse(script.textContent);
+                if (data && data.__listing_StoreState && data.__listing_StoreState.items) {
                     log('JSON data extracted successfully');
                     return data;
-                } catch (e) {
-                    console.error('Error parsing JSON:', e);
                 }
+            } catch (e) {
+                console.error('Error parsing JSON:', e);
             }
         }
         log('No matching script tag found');
