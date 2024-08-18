@@ -2,7 +2,7 @@
 // @name         Allegro Seller Name Replacement
 // @description  Replace seller type labels with actual seller names on Allegro search results, running periodically
 // @namespace    https://github.com/kamilsarelo
-// @version      10
+// @version      11
 // @author       kamilsarelo
 // @update       https://github.com/kamilsarelo/violentmonkey/raw/master/allegro.pl.sellername.user.js
 // @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
@@ -20,6 +20,27 @@
     const INITIAL_DELAY_MS = 1000; // 1 second
     const PERIODIC_DELAY_MS = 1000; // 1 second
     const ENABLE_LOGGING = false; // Set to true to enable logging
+
+    // Custom styles
+    const customStyles = `
+        .highlighted-seller {
+            background-color: #ffff99;
+            color: #000000;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+    `;
+
+    // Function to add styles, compatible with all userscript managers
+    function addStyle(css) {
+        const style = document.createElement('style');
+        style.textContent = css;
+        (document.head || document.documentElement).appendChild(style);
+    }
+
+    // Apply the custom styles
+    addStyle(customStyles);
 
     function log(...args) {
         if (ENABLE_LOGGING) {
@@ -71,7 +92,7 @@
                     
                     if (sellerElement && sellerElement.textContent.trim() !== displayText) {
                         const originalText = sellerElement.textContent.trim();
-                        sellerElement.textContent = displayText;
+                        sellerElement.innerHTML = `<span class="highlighted-seller">${displayText}</span>`;
                         log(`Replaced "${originalText}" with "${displayText}" for URL: ${item.url}`);
                         replacementCount++;
                     }
