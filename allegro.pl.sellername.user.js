@@ -2,7 +2,7 @@
 // @name         Allegro Seller Name Replacement
 // @description  Replace seller type labels with actual seller names on Allegro search results, running periodically
 // @namespace    https://github.com/kamilsarelo
-// @version      9
+// @version      10
 // @author       kamilsarelo
 // @update       https://github.com/kamilsarelo/violentmonkey/raw/master/allegro.pl.sellername.user.js
 // @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
@@ -13,13 +13,22 @@
 // @include      *://www.allegro.com/*
 // ==/UserScript==
 
+// ==UserScript==
+// @name         Allegro Seller Name Replacement (with Polish Quantity Format)
+// @namespace    http://tampermonkey.net/
+// @version      2.0
+// @description  Replace seller type labels with actual seller names and quantity on Allegro search results
+// @match        https://allegro.pl/listing*
+// @grant        none
+// ==/UserScript==
+
 (function() {
     'use strict';
 
     // Configuration constants
     const INITIAL_DELAY_MS = 1000; // 1 second
     const PERIODIC_DELAY_MS = 1000; // 1 second
-    const ENABLE_LOGGING = true; // Set to true to enable logging
+    const ENABLE_LOGGING = false; // Set to true to enable logging
 
     function log(...args) {
         if (ENABLE_LOGGING) {
@@ -58,8 +67,10 @@
         let replacementCount = 0;
 
         items.forEach((item, index) => {
-            if (item.url && item.seller && item.seller.login) {
+            if (item.url && item.seller && item.seller.login && item.quantity !== undefined) {
                 const sellerName = item.seller.login;
+                const quantity = item.quantity;
+                const displayText = `${sellerName} (${quantity} szt.)`;
                 log(`Searching for article with URL: ${item.url}`);
                 const articleElement = document.querySelector(`article a[href="${item.url}"]`);
                 
@@ -67,10 +78,10 @@
                     // Find the seller element using a more robust selector
                     const sellerElement = articleElement.closest('article').querySelector('div[class*="mqu1_"] > span[class*="mpof_"]');
                     
-                    if (sellerElement && sellerElement.textContent.trim() !== sellerName) {
+                    if (sellerElement && sellerElement.textContent.trim() !== displayText) {
                         const originalText = sellerElement.textContent.trim();
-                        sellerElement.textContent = sellerName;
-                        log(`Replaced "${originalText}" with "${sellerName}" for URL: ${item.url}`);
+                        sellerElement.textContent = displayText;
+                        log(`Replaced "${originalText}" with "${displayText}" for URL: ${item.url}`);
                         replacementCount++;
                     }
                 }
