@@ -13,15 +13,6 @@
 // @include      *://www.allegro.com/*
 // ==/UserScript==
 
-// ==UserScript==
-// @name         Allegro Seller Name Replacement (with Polish Quantity Format)
-// @namespace    http://tampermonkey.net/
-// @version      2.0
-// @description  Replace seller type labels with actual seller names and quantity on Allegro search results
-// @match        https://allegro.pl/listing*
-// @grant        none
-// ==/UserScript==
-
 (function() {
     'use strict';
 
