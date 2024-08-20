@@ -2,7 +2,7 @@
 // @name         Allegro Seller Name Replacement
 // @description  Replace seller type labels with actual seller names on Allegro search results, running periodically
 // @namespace    https://github.com/kamilsarelo
-// @version      12
+// @version      13
 // @author       kamilsarelo
 // @update       https://github.com/kamilsarelo/violentmonkey/raw/master/allegro.pl.sellername.user.js
 // @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
@@ -13,6 +13,24 @@
 // @include      *://www.allegro.com/*
 // ==/UserScript==
 
+// ==UserScript==
+// @name         Allegro Seller Name Replacement (Universal, Content-Based)
+// @namespace    http://tampermonkey.net/
+// @version      2.6
+// @description  Replace and highlight seller type labels with actual seller names and quantity on Allegro search results, using content-based selection
+// @match        https://allegro.pl/listing*
+// @grant        none
+// ==/UserScript==
+
+// ==UserScript==
+// @name         Allegro Seller Name Replacement (Universal, Content-Based, 5-min)
+// @namespace    http://tampermonkey.net/
+// @version      2.7
+// @description  Replace and highlight seller type labels with actual seller names and quantity on Allegro search results, using content-based selection, running for 5 minutes
+// @match        https://allegro.pl/listing*
+// @grant        none
+// ==/UserScript==
+
 (function() {
     'use strict';
 
@@ -20,6 +38,7 @@
     const INITIAL_DELAY_MS = 1000; // 1 second
     const PERIODIC_DELAY_MS = 1000; // 1 second
     const ENABLE_LOGGING = false; // Set to true to enable logging
+    const EXECUTION_DURATION_MS = 5 * 60 * 1000; // 5 minutes
 
     // Custom styles
     const customStyles = `
@@ -66,6 +85,17 @@
         return null;
     }
 
+    function findSellerElement(articleElement) {
+        const sellerTypes = ['Firma', 'Oficjalny sklep', 'Prywatny sprzedawca'];
+        for (const type of sellerTypes) {
+            const element = Array.from(articleElement.querySelectorAll('span, div')).find(el => 
+                el.textContent.trim() === type
+            );
+            if (element) return element;
+        }
+        return null;
+    }
+
     function replaceSellerName(jsonData) {
         log('Starting seller name replacement process...');
         if (!jsonData || !jsonData.__listing_StoreState || !jsonData.__listing_StoreState.items) {
@@ -87,8 +117,7 @@
                 const articleElement = document.querySelector(`article a[href="${item.url}"]`);
                 
                 if (articleElement) {
-                    // Find the seller element using a more robust selector
-                    const sellerElement = articleElement.closest('article').querySelector('div[class*="mqu1_"] > span[class*="mpof_"]');
+                    const sellerElement = findSellerElement(articleElement.closest('article'));
                     
                     if (sellerElement) {
                         const highlightedSpan = sellerElement.querySelector('.highlighted-seller');
@@ -105,6 +134,8 @@
                             log(`Created new span with "${displayText}" for URL: ${item.url}`);
                             replacementCount++;
                         }
+                    } else {
+                        log(`Seller element not found for URL: ${item.url}`);
                     }
                 }
             }
@@ -123,17 +154,14 @@
         }
     }
 
-    let executionCount = 0;
-    const MAX_EXECUTIONS = 30; // Stop after 30 seconds (30 executions at 1-second intervals)
-
     function startPeriodicExecution() {
-        log(`Starting periodic execution every ${PERIODIC_DELAY_MS}ms`);
+        log(`Starting periodic execution every ${PERIODIC_DELAY_MS}ms for ${EXECUTION_DURATION_MS}ms`);
+        const startTime = Date.now();
         const intervalId = setInterval(() => {
             initScript();
-            executionCount++;
-            if (executionCount >= MAX_EXECUTIONS) {
+            if (Date.now() - startTime >= EXECUTION_DURATION_MS) {
                 clearInterval(intervalId);
-                log('Reached maximum number of executions. Stopping periodic updates.');
+                log('Reached maximum execution time. Stopping periodic updates.');
             }
         }, PERIODIC_DELAY_MS);
     }
