@@ -2,7 +2,7 @@
 // @name         Allegro Seller Name Replacement
 // @description  Replace seller type labels with actual seller names on Allegro search results, running periodically
 // @namespace    https://github.com/kamilsarelo
-// @version      13
+// @version      14
 // @author       kamilsarelo
 // @update       https://github.com/kamilsarelo/violentmonkey/raw/master/allegro.pl.sellername.user.js
 // @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
@@ -13,32 +13,13 @@
 // @include      *://www.allegro.com/*
 // ==/UserScript==
 
-// ==UserScript==
-// @name         Allegro Seller Name Replacement (Universal, Content-Based)
-// @namespace    http://tampermonkey.net/
-// @version      2.6
-// @description  Replace and highlight seller type labels with actual seller names and quantity on Allegro search results, using content-based selection
-// @match        https://allegro.pl/listing*
-// @grant        none
-// ==/UserScript==
-
-// ==UserScript==
-// @name         Allegro Seller Name Replacement (Universal, Content-Based, 5-min)
-// @namespace    http://tampermonkey.net/
-// @version      2.7
-// @description  Replace and highlight seller type labels with actual seller names and quantity on Allegro search results, using content-based selection, running for 5 minutes
-// @match        https://allegro.pl/listing*
-// @grant        none
-// ==/UserScript==
-
 (function() {
     'use strict';
 
     // Configuration constants
     const INITIAL_DELAY_MS = 1000; // 1 second
-    const PERIODIC_DELAY_MS = 1000; // 1 second
-    const ENABLE_LOGGING = false; // Set to true to enable logging
-    const EXECUTION_DURATION_MS = 5 * 60 * 1000; // 5 minutes
+    const PERIODIC_DELAY_MS = 2000; // 2 seconds
+    const ENABLE_LOGGING = true; // Set to false to disable logging in production
 
     // Custom styles
     const customStyles = `
@@ -56,6 +37,7 @@
         const style = document.createElement('style');
         style.textContent = css;
         (document.head || document.documentElement).appendChild(style);
+        log('Custom styles added to the page');
     }
 
     // Apply the custom styles
@@ -63,13 +45,14 @@
 
     function log(...args) {
         if (ENABLE_LOGGING) {
-            console.log(...args);
+            console.log('[Allegro Seller Script]', ...args);
         }
     }
 
     function extractJsonData() {
         log('Attempting to extract JSON data...');
         const scripts = document.querySelectorAll('script[type="application/json"][data-serialize-box-id]');
+        log(`Found ${scripts.length} script tags with JSON data`);
         for (const script of scripts) {
             try {
                 const data = JSON.parse(script.textContent);
@@ -81,71 +64,78 @@
                 console.error('Error parsing JSON:', e);
             }
         }
-        log('No matching script tag found');
+        log('No matching script tag found with required data');
         return null;
     }
 
     function findSellerElement(articleElement) {
+        log('Searching for seller element within article');
         const sellerTypes = ['Firma', 'Oficjalny sklep', 'Prywatny sprzedawca'];
         for (const type of sellerTypes) {
             const element = Array.from(articleElement.querySelectorAll('span, div')).find(el => 
                 el.textContent.trim() === type
             );
-            if (element) return element;
+            if (element) {
+                log(`Found seller element with type: ${type}`);
+                return element;
+            }
         }
+        log('Seller element not found in article');
         return null;
     }
 
     function replaceSellerName(jsonData) {
-        log('Starting seller name replacement process...');
+        log('Starting seller name replacement process');
         if (!jsonData || !jsonData.__listing_StoreState || !jsonData.__listing_StoreState.items) {
-            log('Required JSON data not found');
+            log('Required JSON data not found, aborting replacement process');
             return;
         }
 
         const items = jsonData.__listing_StoreState.items.elements;
         log(`Found ${items.length} items in JSON data`);
 
-        let replacementCount = 0;
-
         items.forEach((item, index) => {
             if (item.url && item.seller && item.seller.login && item.quantity !== undefined) {
                 const sellerName = item.seller.login;
                 const quantity = item.quantity;
                 const displayText = `${sellerName} (${quantity} szt.)`;
-                log(`Searching for article with URL: ${item.url}`);
+                log(`Processing item ${index + 1}/${items.length}: ${displayText}`);
                 const articleElement = document.querySelector(`article a[href="${item.url}"]`);
                 
                 if (articleElement) {
+                    log(`Found article element for URL: ${item.url}`);
                     const sellerElement = findSellerElement(articleElement.closest('article'));
                     
                     if (sellerElement) {
-                        const highlightedSpan = sellerElement.querySelector('.highlighted-seller');
-                        if (highlightedSpan) {
-                            // If the highlighted span already exists, just update its text content if different
-                            if (highlightedSpan.textContent !== displayText) {
-                                highlightedSpan.textContent = displayText;
-                                log(`Updated existing span with "${displayText}" for URL: ${item.url}`);
-                                replacementCount++;
-                            }
+                        let highlightedSpan = sellerElement.querySelector('.highlighted-seller');
+                        if (!highlightedSpan) {
+                            log('Creating new highlighted span');
+                            highlightedSpan = document.createElement('span');
+                            highlightedSpan.className = 'highlighted-seller';
+                            sellerElement.innerHTML = '';
+                            sellerElement.appendChild(highlightedSpan);
+                        }
+                        if (highlightedSpan.textContent !== displayText) {
+                            highlightedSpan.textContent = displayText;
+                            log(`Updated span with "${displayText}" for URL: ${item.url}`);
                         } else {
-                            // If the highlighted span doesn't exist, create it
-                            sellerElement.innerHTML = `<span class="highlighted-seller">${displayText}</span>`;
-                            log(`Created new span with "${displayText}" for URL: ${item.url}`);
-                            replacementCount++;
+                            log(`Span already up to date for URL: ${item.url}`);
                         }
                     } else {
                         log(`Seller element not found for URL: ${item.url}`);
                     }
+                } else {
+                    log(`Article element not found for URL: ${item.url}`);
                 }
+            } else {
+                log(`Skipping item ${index + 1} due to missing data`);
             }
         });
-
-        log(`Replacement process completed. Total replacements: ${replacementCount}`);
+        log('Seller name replacement process completed');
     }
 
     function initScript() {
-        log('Initializing script...');
+        log('Initializing script');
         const jsonData = extractJsonData();
         if (jsonData) {
             replaceSellerName(jsonData);
@@ -155,26 +145,30 @@
     }
 
     function startPeriodicExecution() {
-        log(`Starting periodic execution every ${PERIODIC_DELAY_MS}ms for ${EXECUTION_DURATION_MS}ms`);
-        const startTime = Date.now();
-        const intervalId = setInterval(() => {
+        log(`Starting periodic execution every ${PERIODIC_DELAY_MS}ms`);
+        setInterval(() => {
+            log('Executing periodic update');
             initScript();
-            if (Date.now() - startTime >= EXECUTION_DURATION_MS) {
-                clearInterval(intervalId);
-                log('Reached maximum execution time. Stopping periodic updates.');
-            }
         }, PERIODIC_DELAY_MS);
     }
 
     function waitForPageLoad() {
-        log('Waiting for page to fully load...');
+        log('Waiting for page to fully load');
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => setTimeout(startPeriodicExecution, INITIAL_DELAY_MS));
+            document.addEventListener('DOMContentLoaded', () => {
+                log('DOMContentLoaded event fired');
+                setTimeout(() => {
+                    log(`Initial delay of ${INITIAL_DELAY_MS}ms completed, starting script`);
+                    startPeriodicExecution();
+                }, INITIAL_DELAY_MS);
+            });
         } else {
+            log('Page already loaded, starting script after initial delay');
             setTimeout(startPeriodicExecution, INITIAL_DELAY_MS);
         }
     }
 
     // Start the script
+    log('Script loaded, waiting for page load');
     waitForPageLoad();
 })();
