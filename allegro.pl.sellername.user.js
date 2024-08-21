@@ -2,7 +2,7 @@
 // @name         Allegro Seller Name Replacement
 // @description  Replace seller type labels with actual seller names on Allegro search results, running periodically
 // @namespace    https://github.com/kamilsarelo
-// @version      14
+// @version      15
 // @author       kamilsarelo
 // @update       https://github.com/kamilsarelo/violentmonkey/raw/master/allegro.pl.sellername.user.js
 // @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
@@ -19,7 +19,9 @@
     // Configuration constants
     const INITIAL_DELAY_MS = 1000; // 1 second
     const PERIODIC_DELAY_MS = 2000; // 2 seconds
-    const ENABLE_LOGGING = true; // Set to false to disable logging in production
+
+    // Logging configuration
+    let ENABLE_LOGGING = false; // Logging is disabled by default
 
     // Custom styles
     const customStyles = `
@@ -43,11 +45,37 @@
     // Apply the custom styles
     addStyle(customStyles);
 
+    // Logging function
     function log(...args) {
         if (ENABLE_LOGGING) {
             console.log('[Allegro Seller Script]', ...args);
         }
     }
+
+    // Function to enable logging
+    function enableLogging() {
+        ENABLE_LOGGING = true;
+        console.log('[Allegro Seller Script] Logging enabled');
+    }
+
+    // Function to disable logging
+    function disableLogging() {
+        ENABLE_LOGGING = false;
+        console.log('[Allegro Seller Script] Logging disabled');
+    }
+
+    // Make logging control functions available globally
+    window.allegroSellerScript = {
+        enableLogging: enableLogging,
+        disableLogging: disableLogging
+    };
+
+    // Log the instructions for enabling/disabling logging
+    console.log(`
+[Allegro Seller Script] Logging Control Instructions:
+- To enable logging, run:  allegroSellerScript.enableLogging()
+- To disable logging, run: allegroSellerScript.disableLogging()
+    `);
 
     function extractJsonData() {
         log('Attempting to extract JSON data...');
@@ -95,10 +123,10 @@
         log(`Found ${items.length} items in JSON data`);
 
         items.forEach((item, index) => {
-            if (item.url && item.seller && item.seller.login && item.quantity !== undefined) {
+            if (item.url && item.seller && item.seller.login) {
                 const sellerName = item.seller.login;
-                const quantity = item.quantity;
-                const displayText = `${sellerName} (${quantity} szt.)`;
+                const quantity = item.quantity !== undefined ? ` (${item.quantity} szt.)` : '';
+                const displayText = `${sellerName}${quantity}`;
                 log(`Processing item ${index + 1}/${items.length}: ${displayText}`);
                 const articleElement = document.querySelector(`article a[href="${item.url}"]`);
                 
