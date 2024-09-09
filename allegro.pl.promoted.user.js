@@ -2,7 +2,7 @@
 // @name         Allegro Sponsored/Promoted Highlighter
 // @description  Highlight sponsored and promoted articles on Allegro search results, running periodically
 // @namespace    https://github.com/yourusername
-// @version      4
+// @version      5
 // @author       kamilsarelo
 // @update       https://github.com/yourusername/violentmonkey/raw/master/allegro.pl.promoted.user.js
 // @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
@@ -22,7 +22,28 @@
 
     const customStyles = `
         .sponsored-promoted-article {
-            background-color: #FFECE1 !important;
+            position: relative !important;
+        }
+        .sponsored-promoted-overlay {
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            background-color: rgba(255, 236, 225, 0.7) !important; /* Semi-transparent light orange */
+            pointer-events: none !important;
+            z-index: 1000 !important;
+        }
+        .sponsored-promoted-label {
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            background-color: #FF5A00 !important;
+            color: white !important;
+            padding: 2px 5px !important;
+            font-size: 12px !important;
+            font-weight: bold !important;
+            z-index: 1001 !important;
         }
     `;
 
@@ -52,16 +73,32 @@
         }
     };
 
+    // Log the instructions for enabling/disabling logging
+    console.log(`
+[Allegro Highlighter] Logging Control Instructions:
+- To enable logging, run:  allegroHighlighter.enableLogging()
+- To disable logging, run: allegroHighlighter.disableLogging()
+    `);
+
     function highlightSponsoredPromoted() {
         log('Starting highlighting process');
         
-        // Use a selector that matches class names containing "1e32a" and ending with "62rFQ"
         const sponsoredPromotedDivs = document.querySelectorAll('div._1e32a_62rFQ');
         
         sponsoredPromotedDivs.forEach((div, index) => {
             const article = div.closest('article');
             if (article && !article.classList.contains('sponsored-promoted-article')) {
                 article.classList.add('sponsored-promoted-article');
+                
+                const overlay = document.createElement('div');
+                overlay.className = 'sponsored-promoted-overlay';
+                article.appendChild(overlay);
+                
+                const label = document.createElement('div');
+                label.className = 'sponsored-promoted-label';
+                label.textContent = 'Sponsored/Promoted';
+                article.appendChild(label);
+                
                 log(`Article ${index + 1} marked as sponsored/promoted`);
             }
         });
