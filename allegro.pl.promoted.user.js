@@ -2,7 +2,7 @@
 // @name         Allegro Sponsored/Promoted Highlighter
 // @description  Highlight sponsored and promoted articles on Allegro search results, running periodically
 // @namespace    https://github.com/yourusername
-// @version      3
+// @version      4
 // @author       kamilsarelo
 // @update       https://github.com/yourusername/violentmonkey/raw/master/allegro.pl.promoted.user.js
 // @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
@@ -22,8 +22,7 @@
 
     const customStyles = `
         .sponsored-promoted-article {
-            border: 3px solid #FF5A00 !important;
-            box-shadow: 0 0 10px #FF5A00 !important;
+            background-color: #FFECE1 !important;
         }
     `;
 
@@ -56,21 +55,18 @@
     function highlightSponsoredPromoted() {
         log('Starting highlighting process');
         
-        // Find all divs that might contain shadow roots
-        const potentialShadowHosts = document.querySelectorAll('div > div:only-child');
+        // Use a selector that matches class names containing "1e32a" and ending with "62rFQ"
+        const sponsoredPromotedDivs = document.querySelectorAll('div._1e32a_62rFQ');
         
-        potentialShadowHosts.forEach((div, index) => {
-            // Check if this div's parent has only one child (which is this div)
-            if (div.parentElement.children.length === 1) {
-                const article = div.closest('article');
-                if (article && !article.classList.contains('sponsored-promoted-article')) {
-                    article.classList.add('sponsored-promoted-article');
-                    log(`Article ${index + 1} marked as potentially sponsored/promoted`);
-                }
+        sponsoredPromotedDivs.forEach((div, index) => {
+            const article = div.closest('article');
+            if (article && !article.classList.contains('sponsored-promoted-article')) {
+                article.classList.add('sponsored-promoted-article');
+                log(`Article ${index + 1} marked as sponsored/promoted`);
             }
         });
 
-        log('Highlighting process completed');
+        log(`Highlighted ${sponsoredPromotedDivs.length} sponsored/promoted articles`);
     }
 
     function startPeriodicExecution() {
