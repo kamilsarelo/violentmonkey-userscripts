@@ -2,10 +2,10 @@
 // @name         Allegro Sponsored/Promoted Highlighter
 // @description  Highlight sponsored and promoted articles on Allegro search results, running periodically
 // @namespace    https://github.com/yourusername
-// @version      1
+// @version      2
 // @author       kamilsarelo
 // @update       https://github.com/yourusername/violentmonkey/raw/master/allegro.pl.promoted.user.js
-// @icon         https://raw.githubusercontent.com/yourusername/violentmonkey/master/allegro.pl.logo.png
+// @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
 // @grant        none
 // @include      *://allegro.pl/*
 // @include      *://www.allegro.pl/*
