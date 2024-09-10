@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         Allegro Sponsored/Promoted Highlighter
-// @description  Highlight sponsored and promoted articles on Allegro search results, running periodically
-// @namespace    https://github.com/yourusername
-// @version      14
+// @description  Highlight sponsored and promoted articles on Allegro search results with a simple overlay
+// @namespace    https://github.com/kamilsarelo
+// @version      15
 // @author       kamilsarelo
-// @update       https://github.com/yourusername/violentmonkey/raw/master/allegro.pl.promoted.user.js
+// @update       https://github.com/kamilsarelo/violentmonkey/raw/master/allegro.pl.promoted.user.js
 // @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
 // @grant        none
 // @include      *://allegro.pl/*
@@ -16,9 +16,9 @@
 (function() {
     'use strict';
 
+    const SPONSORED_CLASS = '_1e32a_62rFQ';
     const INITIAL_DELAY_MS = 1000;
     let ENABLE_LOGGING = false;
-    const SPONSORED_CLASS = '_1e32a_62rFQ';
 
     const customStyles = `
         .sponsored-promoted-article {
@@ -120,7 +120,7 @@
 
     function init() {
         log('Initializing script');
-//        highlightSponsoredPromoted();
+        highlightSponsoredPromoted();
         observeDOMChanges();
     }
 
