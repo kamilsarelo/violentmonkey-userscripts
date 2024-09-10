@@ -2,7 +2,7 @@
 // @name         Allegro Sponsored/Promoted Highlighter
 // @description  Highlight sponsored and promoted articles on Allegro search results, running periodically
 // @namespace    https://github.com/yourusername
-// @version      7
+// @version      8
 // @author       kamilsarelo
 // @update       https://github.com/yourusername/violentmonkey/raw/master/allegro.pl.promoted.user.js
 // @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
@@ -22,7 +22,7 @@
 
     const customStyles = `
         .sponsored-promoted-article {
-            border: 1px solid #FF5A00 !important;
+            border: 3px dotted #FF5A00 !important;
         }
     `;
 
