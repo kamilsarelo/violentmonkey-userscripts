@@ -2,7 +2,7 @@
 // @name         Allegro Sponsored/Promoted Highlighter
 // @description  Highlight sponsored and promoted articles on Allegro search results, running periodically
 // @namespace    https://github.com/yourusername
-// @version      8
+// @version      9
 // @author       kamilsarelo
 // @update       https://github.com/yourusername/violentmonkey/raw/master/allegro.pl.promoted.user.js
 // @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
@@ -22,7 +22,17 @@
 
     const customStyles = `
         .sponsored-promoted-article {
-            border: 3px dotted #FF5A00 !important;
+            position: relative !important;
+        }
+        .sponsored-promoted-overlay {
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            background-color: rgba(255, 90, 0, 0.1) !important; /* Semi-transparent Allegro orange */
+            pointer-events: none !important;
+            z-index: 1000 !important;
         }
     `;
 
@@ -68,6 +78,11 @@
             const article = div.closest('article');
             if (article && !article.classList.contains('sponsored-promoted-article')) {
                 article.classList.add('sponsored-promoted-article');
+                
+                const overlay = document.createElement('div');
+                overlay.className = 'sponsored-promoted-overlay';
+                article.appendChild(overlay);
+                
                 log(`Article ${index + 1} marked as sponsored/promoted`);
             }
         });
