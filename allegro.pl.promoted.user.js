@@ -2,7 +2,7 @@
 // @name         Allegro Sponsored/Promoted Highlighter
 // @description  Highlight sponsored and promoted articles on Allegro search results with a simple overlay
 // @namespace    https://github.com/kamilsarelo
-// @version      15
+// @version      16
 // @author       kamilsarelo
 // @update       https://github.com/kamilsarelo/violentmonkey/raw/master/allegro.pl.promoted.user.js
 // @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
@@ -13,12 +13,13 @@
 // @include      *://www.allegro.com/*
 // ==/UserScript==
 
+
 (function() {
     'use strict';
 
-    const SPONSORED_CLASS = '_1e32a_62rFQ';
     const INITIAL_DELAY_MS = 1000;
     let ENABLE_LOGGING = false;
+    const SPONSORED_CLASSES = ['_1e32a_62rFQ', 'mh36_8 mg9e_8'];
 
     const customStyles = `
         .sponsored-promoted-article {
@@ -78,10 +79,14 @@
         }
     }
 
+    function getSponsoredSelector() {
+        return SPONSORED_CLASSES.map(cls => `div.${cls}`).join(', ');
+    }
+
     function highlightSponsoredPromoted() {
         log('Starting highlighting process');
         
-        const sponsoredPromotedDivs = document.querySelectorAll(`div.${SPONSORED_CLASS}`);
+        const sponsoredPromotedDivs = document.querySelectorAll(getSponsoredSelector());
         
         sponsoredPromotedDivs.forEach((div, index) => {
             const article = div.closest('article');
@@ -100,7 +105,7 @@
                 if (mutation.type === 'childList') {
                     mutation.addedNodes.forEach((node) => {
                         if (node.nodeType === Node.ELEMENT_NODE) {
-                            const sponsoredDivs = node.querySelectorAll(`div.${SPONSORED_CLASS}`);
+                            const sponsoredDivs = node.querySelectorAll(getSponsoredSelector());
                             sponsoredDivs.forEach((sponsoredDiv) => {
                                 const article = sponsoredDiv.closest('article');
                                 if (article) {
