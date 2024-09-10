@@ -2,7 +2,7 @@
 // @name         Allegro Sponsored/Promoted Highlighter
 // @description  Highlight sponsored and promoted articles on Allegro search results, running periodically
 // @namespace    https://github.com/yourusername
-// @version      12
+// @version      13
 // @author       kamilsarelo
 // @update       https://github.com/yourusername/violentmonkey/raw/master/allegro.pl.promoted.user.js
 // @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
@@ -17,8 +17,8 @@
     'use strict';
 
     const INITIAL_DELAY_MS = 1000;
-    const PERIODIC_DELAY_MS = 2000;
     let ENABLE_LOGGING = false;
+    const SPONSORED_CLASS = '_1e32a_62rFQ';
 
     const customStyles = `
         .sponsored-promoted-article {
@@ -81,7 +81,7 @@
     function highlightSponsoredPromoted() {
         log('Starting highlighting process');
         
-        const sponsoredPromotedDivs = document.querySelectorAll('div._1e32a_62rFQ');
+        const sponsoredPromotedDivs = document.querySelectorAll(`div.${SPONSORED_CLASS}`);
         
         sponsoredPromotedDivs.forEach((div, index) => {
             const article = div.closest('article');
@@ -100,14 +100,14 @@
                 if (mutation.type === 'childList') {
                     mutation.addedNodes.forEach((node) => {
                         if (node.nodeType === Node.ELEMENT_NODE) {
-                            const sponsoredDiv = node.querySelector('div._1e32a_62rFQ');
-                            if (sponsoredDiv) {
+                            const sponsoredDivs = node.querySelectorAll(`div.${SPONSORED_CLASS}`);
+                            sponsoredDivs.forEach((sponsoredDiv) => {
                                 const article = sponsoredDiv.closest('article');
                                 if (article) {
                                     addOverlay(article);
                                     log('Overlay added to dynamically loaded article');
                                 }
-                            }
+                            });
                         }
                     });
                 }
@@ -122,7 +122,6 @@
         log('Initializing script');
         highlightSponsoredPromoted();
         observeDOMChanges();
-//        setInterval(highlightSponsoredPromoted, PERIODIC_DELAY_MS);
     }
 
     setTimeout(init, INITIAL_DELAY_MS);
