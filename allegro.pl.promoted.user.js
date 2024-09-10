@@ -2,7 +2,7 @@
 // @name         Allegro Sponsored/Promoted Highlighter
 // @description  Highlight sponsored and promoted articles on Allegro search results, running periodically
 // @namespace    https://github.com/yourusername
-// @version      9
+// @version      10
 // @author       kamilsarelo
 // @update       https://github.com/yourusername/violentmonkey/raw/master/allegro.pl.promoted.user.js
 // @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
@@ -62,12 +62,21 @@
         }
     };
 
-    // Log the instructions for enabling/disabling logging
     console.log(`
 [Allegro Highlighter] Logging Control Instructions:
 - To enable logging, run:  allegroHighlighter.enableLogging()
 - To disable logging, run: allegroHighlighter.disableLogging()
     `);
+
+    function addOverlay(article) {
+        if (!article.querySelector('.sponsored-promoted-overlay')) {
+            article.classList.add('sponsored-promoted-article');
+            const overlay = document.createElement('div');
+            overlay.className = 'sponsored-promoted-overlay';
+            article.appendChild(overlay);
+            log('Overlay added to article');
+        }
+    }
 
     function highlightSponsoredPromoted() {
         log('Starting highlighting process');
@@ -76,32 +85,46 @@
         
         sponsoredPromotedDivs.forEach((div, index) => {
             const article = div.closest('article');
-            if (article && !article.classList.contains('sponsored-promoted-article')) {
-                article.classList.add('sponsored-promoted-article');
-                
-                const overlay = document.createElement('div');
-                overlay.className = 'sponsored-promoted-overlay';
-                article.appendChild(overlay);
-                
-                log(`Article ${index + 1} marked as sponsored/promoted`);
+            if (article) {
+                addOverlay(article);
+                log(`Article ${index + 1} processed`);
             }
         });
 
-        log(`Highlighted ${sponsoredPromotedDivs.length} sponsored/promoted articles`);
+        log(`Processed ${sponsoredPromotedDivs.length} potential sponsored/promoted articles`);
     }
 
-    function startPeriodicExecution() {
-        log(`Starting periodic execution every ${PERIODIC_DELAY_MS}ms`);
-        setInterval(highlightSponsoredPromoted, PERIODIC_DELAY_MS);
+    function observeDOMChanges() {
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'childList') {
+                    mutation.addedNodes.forEach((node) => {
+                        if (node.nodeType === Node.ELEMENT_NODE) {
+                            const sponsoredDiv = node.querySelector('div._1e32a_62rFQ');
+                            if (sponsoredDiv) {
+                                const article = sponsoredDiv.closest('article');
+                                if (article) {
+                                    addOverlay(article);
+                                    log('Overlay added to dynamically loaded article');
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+        });
+
+        observer.observe(document.body, { childList: true, subtree: true });
+        log('DOM observer started');
     }
 
     function init() {
         log('Initializing script');
         highlightSponsoredPromoted();
-        startPeriodicExecution();
+        observeDOMChanges();
+        setInterval(highlightSponsoredPromoted, PERIODIC_DELAY_MS);
     }
 
-    // Start the script after a short delay
     setTimeout(init, INITIAL_DELAY_MS);
 
     log('Script loaded, will initialize after delay');
