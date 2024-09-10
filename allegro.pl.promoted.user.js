@@ -2,7 +2,7 @@
 // @name         Allegro Sponsored/Promoted Highlighter
 // @description  Highlight sponsored and promoted articles on Allegro search results, running periodically
 // @namespace    https://github.com/yourusername
-// @version      10
+// @version      11
 // @author       kamilsarelo
 // @update       https://github.com/yourusername/violentmonkey/raw/master/allegro.pl.promoted.user.js
 // @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
@@ -93,7 +93,7 @@
 
         log(`Processed ${sponsoredPromotedDivs.length} potential sponsored/promoted articles`);
     }
-
+/*
     function observeDOMChanges() {
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
@@ -113,7 +113,7 @@
                 }
             });
         });
-
+*/
         observer.observe(document.body, { childList: true, subtree: true });
         log('DOM observer started');
     }
@@ -121,7 +121,7 @@
     function init() {
         log('Initializing script');
         highlightSponsoredPromoted();
-        observeDOMChanges();
+//        observeDOMChanges();
         setInterval(highlightSponsoredPromoted, PERIODIC_DELAY_MS);
     }
 
