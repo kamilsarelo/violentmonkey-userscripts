@@ -2,7 +2,7 @@
 // @name         Allegro Sponsored/Promoted Highlighter
 // @description  Highlight sponsored and promoted articles on Allegro search results, running periodically
 // @namespace    https://github.com/yourusername
-// @version      5
+// @version      6
 // @author       kamilsarelo
 // @update       https://github.com/yourusername/violentmonkey/raw/master/allegro.pl.promoted.user.js
 // @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
@@ -22,28 +22,8 @@
 
     const customStyles = `
         .sponsored-promoted-article {
+            box-shadow: inset 0 0 0 3px #FF5A00 !important; /* Allegro orange inner border */
             position: relative !important;
-        }
-        .sponsored-promoted-overlay {
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            height: 100% !important;
-            background-color: rgba(255, 236, 225, 0.7) !important; /* Semi-transparent light orange */
-            pointer-events: none !important;
-            z-index: 1000 !important;
-        }
-        .sponsored-promoted-label {
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
-            background-color: #FF5A00 !important;
-            color: white !important;
-            padding: 2px 5px !important;
-            font-size: 12px !important;
-            font-weight: bold !important;
-            z-index: 1001 !important;
         }
     `;
 
@@ -89,16 +69,6 @@
             const article = div.closest('article');
             if (article && !article.classList.contains('sponsored-promoted-article')) {
                 article.classList.add('sponsored-promoted-article');
-                
-                const overlay = document.createElement('div');
-                overlay.className = 'sponsored-promoted-overlay';
-                article.appendChild(overlay);
-                
-                const label = document.createElement('div');
-                label.className = 'sponsored-promoted-label';
-                label.textContent = 'Sponsored/Promoted';
-                article.appendChild(label);
-                
                 log(`Article ${index + 1} marked as sponsored/promoted`);
             }
         });
