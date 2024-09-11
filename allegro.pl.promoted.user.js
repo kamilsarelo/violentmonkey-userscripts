@@ -2,7 +2,7 @@
 // @name         Allegro Sponsored/Promoted Highlighter
 // @description  Highlight sponsored and promoted articles on Allegro search results with a simple overlay
 // @namespace    https://github.com/kamilsarelo
-// @version      24
+// @version      25
 // @author       kamilsarelo
 // @update       https://github.com/kamilsarelo/violentmonkey/raw/master/allegro.pl.promoted.user.js
 // @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
@@ -17,6 +17,7 @@
     'use strict';
 
     const INITIAL_DELAY_MS = 1000;
+    const PERIODIC_DELAY_MS = 2000;
     let ENABLE_LOGGING = false;
     const SPONSORED_CLASS = '_1e32a_62rFQ';
     const SPONSORED_IMAGE_SRC = 'https://a.allegroimg.com/original/34a646/639f929246af8f23da49cf64e9d7/action-common-information-33306995c6';
@@ -85,52 +86,40 @@
         return img !== null;
     }
 
-    function processSponsoredArticle(article) {
-        if (!article.querySelector(`.${OVERLAY_CLASS}`)) {
-            if (article.querySelector(`div.${SPONSORED_CLASS}`) || isSponsoredByImage(article)) {
-                addOverlay(article);
-                log('Processed sponsored/promoted article');
-            }
-        }
-    }
-
     function highlightSponsoredPromoted() {
         log('Starting highlighting process');
         
-        document.querySelectorAll('article').forEach(article => {
-            processSponsoredArticle(article);
+        const sponsoredPromotedDivs = document.querySelectorAll(`div.${SPONSORED_CLASS}`);
+        
+        sponsoredPromotedDivs.forEach((div, index) => {
+            const article = div.closest('article');
+            if (article && !article.querySelector(`.${OVERLAY_CLASS}`)) {
+                addOverlay(article);
+                log(`Article ${index + 1} processed as sponsored/promoted (class)`);
+            }
         });
 
-        log(`Total processed: ${document.querySelectorAll(`.${OVERLAY_CLASS}`).length} sponsored/promoted articles`);
+        // Additional check for the image
+        const allArticles = document.querySelectorAll('article');
+        allArticles.forEach((article, index) => {
+            if (!article.querySelector(`.${OVERLAY_CLASS}`) && isSponsoredByImage(article)) {
+                addOverlay(article);
+                log(`Article ${index + 1} processed as sponsored/promoted (image)`);
+            }
+        });
+
+        log(`Processed ${document.querySelectorAll(`.${OVERLAY_CLASS}`).length} sponsored/promoted articles`);
     }
 
-    function observeDOMChanges() {
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                if (mutation.type === 'childList') {
-                    mutation.addedNodes.forEach((node) => {
-                        if (node.nodeType === Node.ELEMENT_NODE) {
-                            if (node.tagName.toLowerCase() === 'article') {
-                                processSponsoredArticle(node);
-                            } else {
-                                node.querySelectorAll('article').forEach(article => {
-                                    processSponsoredArticle(article);
-                                });
-                            }
-                        }
-                    });
-                }
-            });
-        });
-
-        observer.observe(document.body, { childList: true, subtree: true });
-        log('DOM observer started');
+    function startPeriodicExecution() {
+        log(`Starting periodic execution every ${PERIODIC_DELAY_MS}ms`);
+        setInterval(highlightSponsoredPromoted, PERIODIC_DELAY_MS);
     }
 
     function init() {
         log('Initializing script');
         highlightSponsoredPromoted();
-        observeDOMChanges();
+        startPeriodicExecution();
     }
 
     setTimeout(init, INITIAL_DELAY_MS);
