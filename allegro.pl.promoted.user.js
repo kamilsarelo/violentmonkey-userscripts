@@ -2,7 +2,7 @@
 // @name         Allegro Sponsored/Promoted Highlighter
 // @description  Highlight sponsored and promoted articles on Allegro search results with a simple overlay
 // @namespace    https://github.com/kamilsarelo
-// @version      25
+// @version      26
 // @author       kamilsarelo
 // @update       https://github.com/kamilsarelo/violentmonkey/raw/master/allegro.pl.promoted.user.js
 // @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
@@ -16,12 +16,16 @@
 (function() {
     'use strict';
 
-    const INITIAL_DELAY_MS = 1000;
-    const PERIODIC_DELAY_MS = 2000;
+    const INITIAL_DELAY_MS = 500;
+    const SCROLL_CHECK_INTERVAL_MS = 250;
     let ENABLE_LOGGING = false;
     const SPONSORED_CLASS = '_1e32a_62rFQ';
     const SPONSORED_IMAGE_SRC = 'https://a.allegroimg.com/original/34a646/639f929246af8f23da49cf64e9d7/action-common-information-33306995c6';
     const OVERLAY_CLASS = 'sponsored-promoted-overlay';
+
+    let isScrolling = false;
+    let scrollTimeout;
+    let highlightInterval;
 
     const customStyles = `
         .sponsored-promoted-article {
@@ -111,15 +115,35 @@
         log(`Processed ${document.querySelectorAll(`.${OVERLAY_CLASS}`).length} sponsored/promoted articles`);
     }
 
-    function startPeriodicExecution() {
-        log(`Starting periodic execution every ${PERIODIC_DELAY_MS}ms`);
-        setInterval(highlightSponsoredPromoted, PERIODIC_DELAY_MS);
+    function startScrollExecution() {
+        log('Starting scroll-based execution');
+        if (highlightInterval) {
+            clearInterval(highlightInterval);
+        }
+        highlightInterval = setInterval(highlightSponsoredPromoted, SCROLL_CHECK_INTERVAL_MS);
+    }
+
+    function handleScroll() {
+        if (!isScrolling) {
+            isScrolling = true;
+            startScrollExecution();
+            log('Scrolling detected, increased check frequency');
+        }
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+            isScrolling = false;
+            if (highlightInterval) {
+                clearInterval(highlightInterval);
+                highlightInterval = null;
+            }
+            log('Scrolling stopped, paused checks');
+        }, 200); // Wait for 200ms of no scrolling before considering it stopped
     }
 
     function init() {
         log('Initializing script');
-        highlightSponsoredPromoted();
-        startPeriodicExecution();
+        highlightSponsoredPromoted(); // Initial check
+        window.addEventListener('scroll', handleScroll, { passive: true });
     }
 
     setTimeout(init, INITIAL_DELAY_MS);
