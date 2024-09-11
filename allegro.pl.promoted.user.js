@@ -2,7 +2,7 @@
 // @name         Allegro Sponsored/Promoted Highlighter
 // @description  Highlight sponsored and promoted articles on Allegro search results with a simple overlay
 // @namespace    https://github.com/kamilsarelo
-// @version      21
+// @version      22
 // @author       kamilsarelo
 // @update       https://github.com/kamilsarelo/violentmonkey/raw/master/allegro.pl.promoted.user.js
 // @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
@@ -21,12 +21,13 @@
     let ENABLE_LOGGING = false;
     const SPONSORED_CLASS = '_1e32a_62rFQ';
     const SPONSORED_IMAGE_IDENTIFIER = 'action-common-information-33306995c6';
+    const OVERLAY_CLASS = 'sponsored-promoted-overlay';
 
     const customStyles = `
         .sponsored-promoted-article {
             position: relative !important;
         }
-        .sponsored-promoted-overlay {
+        .${OVERLAY_CLASS} {
             position: absolute !important;
             top: 0 !important;
             left: 0 !important;
@@ -71,10 +72,10 @@
     `);
 
     function addOverlay(article) {
-        if (!article.querySelector('.sponsored-promoted-overlay')) {
+        if (!article.querySelector(`.${OVERLAY_CLASS}`)) {
             article.classList.add('sponsored-promoted-article');
             const overlay = document.createElement('div');
-            overlay.className = 'sponsored-promoted-overlay';
+            overlay.className = OVERLAY_CLASS;
             article.appendChild(overlay);
             log('Overlay added to article');
         }
@@ -87,22 +88,22 @@
         
         sponsoredPromotedDivs.forEach((div, index) => {
             const article = div.closest('article');
-            if (article && !article.classList.contains('sponsored-promoted-article')) {
+            if (article && !article.querySelector(`.${OVERLAY_CLASS}`)) {
                 addOverlay(article);
                 log(`Article ${index + 1} processed as sponsored/promoted`);
             }
         });
 
         // Additional check for the image identifier
-        const allArticles = document.querySelectorAll('article:not(.sponsored-promoted-article)');
+        const allArticles = document.querySelectorAll('article');
         allArticles.forEach((article, index) => {
-            if (article.innerHTML.includes(SPONSORED_IMAGE_IDENTIFIER)) {
+            if (!article.querySelector(`.${OVERLAY_CLASS}`) && article.innerHTML.includes(SPONSORED_IMAGE_IDENTIFIER)) {
                 addOverlay(article);
                 log(`Article ${index + 1} processed as sponsored/promoted (image identifier)`);
             }
         });
 
-        log(`Processed ${sponsoredPromotedDivs.length} sponsored/promoted articles`);
+        log(`Processed ${document.querySelectorAll(`.${OVERLAY_CLASS}`).length} sponsored/promoted articles`);
     }
 
     function startPeriodicExecution() {
