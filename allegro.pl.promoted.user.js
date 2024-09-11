@@ -2,7 +2,7 @@
 // @name         Allegro Sponsored/Promoted Highlighter
 // @description  Highlight sponsored and promoted articles on Allegro search results with a simple overlay
 // @namespace    https://github.com/kamilsarelo
-// @version      22
+// @version      23
 // @author       kamilsarelo
 // @update       https://github.com/kamilsarelo/violentmonkey/raw/master/allegro.pl.promoted.user.js
 // @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
@@ -20,7 +20,7 @@
     const PERIODIC_DELAY_MS = 2000;
     let ENABLE_LOGGING = false;
     const SPONSORED_CLASS = '_1e32a_62rFQ';
-    const SPONSORED_IMAGE_IDENTIFIER = 'action-common-information-33306995c6';
+    const SPONSORED_IMAGE_SRC = 'https://a.allegroimg.com/original/34a646/639f929246af8f23da49cf64e9d7/action-common-information-33306995c6';
     const OVERLAY_CLASS = 'sponsored-promoted-overlay';
 
     const customStyles = `
@@ -81,6 +81,11 @@
         }
     }
 
+    function isSponsoredByImage(article) {
+        const img = article.querySelector('div > div > div > button > img[src="' + SPONSORED_IMAGE_SRC + '"]');
+        return img !== null;
+    }
+
     function highlightSponsoredPromoted() {
         log('Starting highlighting process');
         
@@ -90,16 +95,16 @@
             const article = div.closest('article');
             if (article && !article.querySelector(`.${OVERLAY_CLASS}`)) {
                 addOverlay(article);
-                log(`Article ${index + 1} processed as sponsored/promoted`);
+                log(`Article ${index + 1} processed as sponsored/promoted (class)`);
             }
         });
 
-        // Additional check for the image identifier
+        // Additional check for the image
         const allArticles = document.querySelectorAll('article');
         allArticles.forEach((article, index) => {
-            if (!article.querySelector(`.${OVERLAY_CLASS}`) && article.innerHTML.includes(SPONSORED_IMAGE_IDENTIFIER)) {
+            if (!article.querySelector(`.${OVERLAY_CLASS}`) && isSponsoredByImage(article)) {
                 addOverlay(article);
-                log(`Article ${index + 1} processed as sponsored/promoted (image identifier)`);
+                log(`Article ${index + 1} processed as sponsored/promoted (image)`);
             }
         });
 
