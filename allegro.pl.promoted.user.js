@@ -2,7 +2,7 @@
 // @name         Allegro Sponsored/Promoted Highlighter
 // @description  Highlight sponsored and promoted articles on Allegro search results with a simple overlay
 // @namespace    https://github.com/kamilsarelo
-// @version      27
+// @version      28
 // @author       kamilsarelo
 // @update       https://github.com/kamilsarelo/violentmonkey/raw/master/allegro.pl.promoted.user.js
 // @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
@@ -16,20 +16,29 @@
 (function() {
     'use strict';
 
-    const INITIAL_DELAY_MS = 500;
-    const SCROLL_CHECK_INTERVAL_MS = 250;
-    let ENABLE_LOGGING = false;
+    // Configurable parameters
+    const CONFIG = {
+        INITIAL_DELAY_MS: 1000,        // Delay before first check after page load
+        SCROLL_CHECK_INTERVAL_MS: 250, // Interval between checks during scrolling
+        SCROLL_STOP_DELAY_MS: 200      // Delay to consider scrolling has stopped
+    };
+
+    // Constants
     const SPONSORED_CLASS = '_1e32a_62rFQ';
     const SPONSORED_IMAGE_SRC = 'https://a.allegroimg.com/original/34a646/639f929246af8f23da49cf64e9d7/action-common-information-33306995c6';
     const OVERLAY_CLASS = 'sponsored-promoted-overlay';
+    const ARTICLE_CLASS = 'sponsored-promoted-article';
+    const LOGGER_NAME = '[Allegro Highlighter]';
 
+    // State variables
+    let ENABLE_LOGGING = false;
     let isScrolling = false;
     let scrollTimeout;
     let highlightInterval;
     let isProcessing = false;
 
     const customStyles = `
-        .sponsored-promoted-article {
+        .${ARTICLE_CLASS} {
             position: relative !important;
         }
         .${OVERLAY_CLASS} {
@@ -51,34 +60,32 @@
         log('Custom styles added to the page');
     }
 
-    addStyle(customStyles);
-
     function log(...args) {
         if (ENABLE_LOGGING) {
-            console.log('[Allegro Highlighter]', ...args);
+            console.log(LOGGER_NAME, ...args);
         }
     }
 
     window.allegroHighlighter = {
         enableLogging: () => {
             ENABLE_LOGGING = true;
-            console.log('[Allegro Highlighter] Logging enabled');
+            console.log(LOGGER_NAME, 'Logging enabled');
         },
         disableLogging: () => {
             ENABLE_LOGGING = false;
-            console.log('[Allegro Highlighter] Logging disabled');
+            console.log(LOGGER_NAME, 'Logging disabled');
         }
     };
 
     console.log(`
-[Allegro Highlighter] Logging Control Instructions:
+${LOGGER_NAME} Logging Control Instructions:
 - To enable logging, run:  allegroHighlighter.enableLogging()
 - To disable logging, run: allegroHighlighter.disableLogging()
     `);
 
     function addOverlay(article) {
         if (!article.querySelector(`.${OVERLAY_CLASS}`)) {
-            article.classList.add('sponsored-promoted-article');
+            article.classList.add(ARTICLE_CLASS);
             const overlay = document.createElement('div');
             overlay.className = OVERLAY_CLASS;
             article.appendChild(overlay);
@@ -87,7 +94,7 @@
     }
 
     function isSponsoredByImage(article) {
-        const img = article.querySelector('div > div > div > button > img[src="' + SPONSORED_IMAGE_SRC + '"]');
+        const img = article.querySelector(`div > div > div > button > img[src="${SPONSORED_IMAGE_SRC}"]`);
         return img !== null;
     }
 
@@ -128,7 +135,7 @@
         if (highlightInterval) {
             clearInterval(highlightInterval);
         }
-        highlightInterval = setInterval(highlightSponsoredPromoted, SCROLL_CHECK_INTERVAL_MS);
+        highlightInterval = setInterval(highlightSponsoredPromoted, CONFIG.SCROLL_CHECK_INTERVAL_MS);
     }
 
     function handleScroll() {
@@ -145,16 +152,17 @@
                 highlightInterval = null;
             }
             log('Scrolling stopped, paused checks');
-        }, 200); // Wait for 200ms of no scrolling before considering it stopped
+        }, CONFIG.SCROLL_STOP_DELAY_MS);
     }
 
     function init() {
         log('Initializing script');
+        addStyle(customStyles);
         highlightSponsoredPromoted(); // Initial check
         window.addEventListener('scroll', handleScroll, { passive: true });
     }
 
-    setTimeout(init, INITIAL_DELAY_MS);
+    setTimeout(init, CONFIG.INITIAL_DELAY_MS);
 
     log('Script loaded, will initialize after delay');
 })();
