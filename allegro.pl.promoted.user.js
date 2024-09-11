@@ -2,7 +2,7 @@
 // @name         Allegro Sponsored/Promoted Highlighter
 // @description  Highlight sponsored and promoted articles on Allegro search results with a simple overlay
 // @namespace    https://github.com/kamilsarelo
-// @version      20
+// @version      21
 // @author       kamilsarelo
 // @update       https://github.com/kamilsarelo/violentmonkey/raw/master/allegro.pl.promoted.user.js
 // @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
@@ -19,8 +19,8 @@
     const INITIAL_DELAY_MS = 1000;
     const PERIODIC_DELAY_MS = 2000;
     let ENABLE_LOGGING = false;
+    const SPONSORED_CLASS = '_1e32a_62rFQ';
     const SPONSORED_IMAGE_IDENTIFIER = 'action-common-information-33306995c6';
-    const SPONSORED_CLASS_PATTERN = '_1e32a_62rFQ';
 
     const customStyles = `
         .sponsored-promoted-article {
@@ -80,26 +80,29 @@
         }
     }
 
-    function isSponsoredArticle(article) {
-        return article.innerHTML.includes(SPONSORED_IMAGE_IDENTIFIER) || 
-               Array.from(article.querySelectorAll('*')).some(el => SPONSORED_CLASS_PATTERN.test(el.className));
-    }
-
     function highlightSponsoredPromoted() {
         log('Starting highlighting process');
         
-        const allArticles = document.querySelectorAll('article');
-        let sponsoredCount = 0;
+        const sponsoredPromotedDivs = document.querySelectorAll(`div.${SPONSORED_CLASS}`);
         
-        allArticles.forEach((article, index) => {
-            if (isSponsoredArticle(article)) {
+        sponsoredPromotedDivs.forEach((div, index) => {
+            const article = div.closest('article');
+            if (article && !article.classList.contains('sponsored-promoted-article')) {
                 addOverlay(article);
-                sponsoredCount++;
                 log(`Article ${index + 1} processed as sponsored/promoted`);
             }
         });
 
-        log(`Processed ${sponsoredCount} sponsored/promoted articles out of ${allArticles.length} total articles`);
+        // Additional check for the image identifier
+        const allArticles = document.querySelectorAll('article:not(.sponsored-promoted-article)');
+        allArticles.forEach((article, index) => {
+            if (article.innerHTML.includes(SPONSORED_IMAGE_IDENTIFIER)) {
+                addOverlay(article);
+                log(`Article ${index + 1} processed as sponsored/promoted (image identifier)`);
+            }
+        });
+
+        log(`Processed ${sponsoredPromotedDivs.length} sponsored/promoted articles`);
     }
 
     function startPeriodicExecution() {
