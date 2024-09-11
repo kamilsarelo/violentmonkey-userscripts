@@ -2,7 +2,7 @@
 // @name         Allegro Sponsored/Promoted Highlighter
 // @description  Highlight sponsored and promoted articles on Allegro search results with a simple overlay
 // @namespace    https://github.com/kamilsarelo
-// @version      26
+// @version      27
 // @author       kamilsarelo
 // @update       https://github.com/kamilsarelo/violentmonkey/raw/master/allegro.pl.promoted.user.js
 // @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
@@ -26,6 +26,7 @@
     let isScrolling = false;
     let scrollTimeout;
     let highlightInterval;
+    let isProcessing = false;
 
     const customStyles = `
         .sponsored-promoted-article {
@@ -91,6 +92,12 @@
     }
 
     function highlightSponsoredPromoted() {
+        if (isProcessing) {
+            log('Highlighting process already running, skipping this iteration');
+            return;
+        }
+
+        isProcessing = true;
         log('Starting highlighting process');
         
         const sponsoredPromotedDivs = document.querySelectorAll(`div.${SPONSORED_CLASS}`);
@@ -113,6 +120,7 @@
         });
 
         log(`Processed ${document.querySelectorAll(`.${OVERLAY_CLASS}`).length} sponsored/promoted articles`);
+        isProcessing = false;
     }
 
     function startScrollExecution() {
