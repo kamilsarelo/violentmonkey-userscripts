@@ -2,7 +2,7 @@
 // @name         Allegro Sponsored/Promoted Highlighter
 // @description  Highlight sponsored and promoted articles on Allegro search results with a simple overlay
 // @namespace    https://github.com/kamilsarelo
-// @version      16
+// @version      17
 // @author       kamilsarelo
 // @update       https://github.com/kamilsarelo/violentmonkey/raw/master/allegro.pl.promoted.user.js
 // @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
@@ -13,13 +13,12 @@
 // @include      *://www.allegro.com/*
 // ==/UserScript==
 
-
 (function() {
     'use strict';
 
     const INITIAL_DELAY_MS = 1000;
     let ENABLE_LOGGING = false;
-    const SPONSORED_CLASSES = ['_1e32a_62rFQ', 'mh36_8 mg9e_8'];
+    const SPONSORED_IMAGE_SRC = 'https://a.allegroimg.com/original/34a646/639f929246af8f23da49cf64e9d7/action-common-information-33306995c6';
 
     const customStyles = `
         .sponsored-promoted-article {
@@ -79,24 +78,25 @@
         }
     }
 
-    function getSponsoredSelector() {
-        return SPONSORED_CLASSES.map(cls => `div.${cls}`).join(', ');
+    function isSponsoredArticle(article) {
+        return article.querySelector(`img[src="${SPONSORED_IMAGE_SRC}"]`) !== null;
     }
 
     function highlightSponsoredPromoted() {
         log('Starting highlighting process');
         
-        const sponsoredPromotedDivs = document.querySelectorAll(getSponsoredSelector());
+        const allArticles = document.querySelectorAll('article');
+        let sponsoredCount = 0;
         
-        sponsoredPromotedDivs.forEach((div, index) => {
-            const article = div.closest('article');
-            if (article) {
+        allArticles.forEach((article, index) => {
+            if (isSponsoredArticle(article)) {
                 addOverlay(article);
-                log(`Article ${index + 1} processed`);
+                sponsoredCount++;
+                log(`Article ${index + 1} processed as sponsored/promoted`);
             }
         });
 
-        log(`Processed ${sponsoredPromotedDivs.length} potential sponsored/promoted articles`);
+        log(`Processed ${sponsoredCount} sponsored/promoted articles out of ${allArticles.length} total articles`);
     }
 
     function observeDOMChanges() {
@@ -105,14 +105,18 @@
                 if (mutation.type === 'childList') {
                     mutation.addedNodes.forEach((node) => {
                         if (node.nodeType === Node.ELEMENT_NODE) {
-                            const sponsoredDivs = node.querySelectorAll(getSponsoredSelector());
-                            sponsoredDivs.forEach((sponsoredDiv) => {
-                                const article = sponsoredDiv.closest('article');
-                                if (article) {
-                                    addOverlay(article);
-                                    log('Overlay added to dynamically loaded article');
-                                }
-                            });
+                            if (node.tagName.toLowerCase() === 'article' && isSponsoredArticle(node)) {
+                                addOverlay(node);
+                                log('Overlay added to dynamically loaded sponsored article');
+                            } else {
+                                const articles = node.querySelectorAll('article');
+                                articles.forEach(article => {
+                                    if (isSponsoredArticle(article)) {
+                                        addOverlay(article);
+                                        log('Overlay added to dynamically loaded sponsored article');
+                                    }
+                                });
+                            }
                         }
                     });
                 }
