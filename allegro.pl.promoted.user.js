@@ -2,7 +2,7 @@
 // @name         Allegro Sponsored/Promoted Highlighter
 // @description  Highlight sponsored and promoted articles on Allegro search results with a simple overlay
 // @namespace    https://github.com/kamilsarelo
-// @version      17
+// @version      18
 // @author       kamilsarelo
 // @update       https://github.com/kamilsarelo/violentmonkey/raw/master/allegro.pl.promoted.user.js
 // @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
@@ -18,7 +18,7 @@
 
     const INITIAL_DELAY_MS = 1000;
     let ENABLE_LOGGING = false;
-    const SPONSORED_IMAGE_SRC = 'https://a.allegroimg.com/original/34a646/639f929246af8f23da49cf64e9d7/action-common-information-33306995c6';
+    const SPONSORED_IMAGE_IDENTIFIER = 'action-common-information-33306995c6';
 
     const customStyles = `
         .sponsored-promoted-article {
@@ -79,7 +79,7 @@
     }
 
     function isSponsoredArticle(article) {
-        return article.querySelector(`img[src="${SPONSORED_IMAGE_SRC}"]`) !== null;
+        return article.innerHTML.includes(SPONSORED_IMAGE_IDENTIFIER);
     }
 
     function highlightSponsoredPromoted() {
