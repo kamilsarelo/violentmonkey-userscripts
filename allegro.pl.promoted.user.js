@@ -2,7 +2,7 @@
 // @name         Allegro Sponsored/Promoted Highlighter
 // @description  Highlight sponsored and promoted articles on Allegro search results with a simple overlay
 // @namespace    https://github.com/kamilsarelo
-// @version      18
+// @version      19
 // @author       kamilsarelo
 // @update       https://github.com/kamilsarelo/violentmonkey/raw/master/allegro.pl.promoted.user.js
 // @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
@@ -17,6 +17,7 @@
     'use strict';
 
     const INITIAL_DELAY_MS = 1000;
+    const PERIODIC_DELAY_MS = 2000;
     let ENABLE_LOGGING = false;
     const SPONSORED_IMAGE_IDENTIFIER = 'action-common-information-33306995c6';
 
@@ -99,38 +100,15 @@
         log(`Processed ${sponsoredCount} sponsored/promoted articles out of ${allArticles.length} total articles`);
     }
 
-    function observeDOMChanges() {
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                if (mutation.type === 'childList') {
-                    mutation.addedNodes.forEach((node) => {
-                        if (node.nodeType === Node.ELEMENT_NODE) {
-                            if (node.tagName.toLowerCase() === 'article' && isSponsoredArticle(node)) {
-                                addOverlay(node);
-                                log('Overlay added to dynamically loaded sponsored article');
-                            } else {
-                                const articles = node.querySelectorAll('article');
-                                articles.forEach(article => {
-                                    if (isSponsoredArticle(article)) {
-                                        addOverlay(article);
-                                        log('Overlay added to dynamically loaded sponsored article');
-                                    }
-                                });
-                            }
-                        }
-                    });
-                }
-            });
-        });
-
-        observer.observe(document.body, { childList: true, subtree: true });
-        log('DOM observer started');
+    function startPeriodicExecution() {
+        log(`Starting periodic execution every ${PERIODIC_DELAY_MS}ms`);
+        setInterval(highlightSponsoredPromoted, PERIODIC_DELAY_MS);
     }
 
     function init() {
         log('Initializing script');
         highlightSponsoredPromoted();
-        observeDOMChanges();
+        startPeriodicExecution();
     }
 
     setTimeout(init, INITIAL_DELAY_MS);
