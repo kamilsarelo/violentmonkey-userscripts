@@ -2,7 +2,7 @@
 // @name         Allegro Sponsored/Promoted Highlighter
 // @description  Highlight sponsored and promoted articles on Allegro search results with a simple overlay
 // @namespace    https://github.com/kamilsarelo
-// @version      30
+// @version      31
 // @author       kamilsarelo
 // @update       https://github.com/kamilsarelo/violentmonkey/raw/master/allegro.pl.promoted.user.js
 // @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
@@ -18,9 +18,8 @@
 
     // Configurable parameters
     const CONFIG = {
-        INITIAL_DELAY_MS: 1000,        // Delay before first check after page load
-        SCROLL_CHECK_INTERVAL_MS: 250, // Interval between checks during scrolling
-        SCROLL_STOP_DELAY_MS: 200      // Delay to consider scrolling has stopped
+        INITIAL_DELAY_MS: 1000,   // Delay before first check after page load
+        DEBOUNCE_DELAY_MS: 250    // Debounce delay for all events
     };
 
     // Constants
@@ -33,10 +32,7 @@
 
     // State variables
     let ENABLE_LOGGING = false;
-    let isScrolling = false;
-    let scrollTimeout;
-    let highlightInterval;
-    let isProcessing = false;
+    let processingPromise = null;
 
     const customStyles = `
         .${ARTICLE_CLASS} {
@@ -100,82 +96,85 @@ ${LOGGER_NAME} Logging Control Instructions:
     }
 
     function highlightSponsoredPromoted() {
-        if (isProcessing) {
+        if (processingPromise) {
             log('Highlighting process already running, skipping this iteration');
-            return;
+            return processingPromise;
         }
 
-        isProcessing = true;
-        log('Starting highlighting process');
-        
-        const sponsoredPromotedDivs = document.querySelectorAll(`div.${SPONSORED_CLASS}`);
-        
-        sponsoredPromotedDivs.forEach((div, index) => {
-            const article = div.closest('article');
-            if (article && !article.querySelector(`.${OVERLAY_CLASS}`)) {
-                addOverlay(article);
-                log(`Article ${index + 1} processed as sponsored/promoted (class)`);
-            }
+        processingPromise = new Promise((resolve) => {
+            log('Starting highlighting process');
+            
+            const sponsoredPromotedDivs = document.querySelectorAll(`div.${SPONSORED_CLASS}`);
+            
+            sponsoredPromotedDivs.forEach((div, index) => {
+                const article = div.closest('article');
+                if (article && !article.querySelector(`.${OVERLAY_CLASS}`)) {
+                    addOverlay(article);
+                    log(`Article ${index + 1} processed as sponsored/promoted (class)`);
+                }
+            });
+
+            // Additional check for the image
+            const allArticles = document.querySelectorAll('article');
+            allArticles.forEach((article, index) => {
+                if (!article.querySelector(`.${OVERLAY_CLASS}`) && isSponsoredByImage(article)) {
+                    addOverlay(article);
+                    log(`Article ${index + 1} processed as sponsored/promoted (image)`);
+                }
+            });
+
+            log(`Processed ${document.querySelectorAll(`.${OVERLAY_CLASS}`).length} sponsored/promoted articles`);
+            resolve();
+        }).finally(() => {
+            processingPromise = null;
         });
 
-        // Additional check for the image
-        const allArticles = document.querySelectorAll('article');
-        allArticles.forEach((article, index) => {
-            if (!article.querySelector(`.${OVERLAY_CLASS}`) && isSponsoredByImage(article)) {
-                addOverlay(article);
-                log(`Article ${index + 1} processed as sponsored/promoted (image)`);
-            }
-        });
-
-        log(`Processed ${document.querySelectorAll(`.${OVERLAY_CLASS}`).length} sponsored/promoted articles`);
-        isProcessing = false;
+        return processingPromise;
     }
 
-    function startScrollExecution() {
-        log('Starting scroll-based execution');
-        if (highlightInterval) {
-            clearInterval(highlightInterval);
-        }
-        highlightInterval = setInterval(highlightSponsoredPromoted, CONFIG.SCROLL_CHECK_INTERVAL_MS);
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
     }
+
+    const debouncedHighlight = debounce(highlightSponsoredPromoted, CONFIG.DEBOUNCE_DELAY_MS);
 
     function handleScroll() {
-        if (!isScrolling) {
-            isScrolling = true;
-            startScrollExecution();
-            log('Scrolling detected, increased check frequency');
-        }
-        clearTimeout(scrollTimeout);
-        scrollTimeout = setTimeout(() => {
-            isScrolling = false;
-            if (highlightInterval) {
-                clearInterval(highlightInterval);
-                highlightInterval = null;
-            }
-            log('Scrolling stopped, paused checks');
-        }, CONFIG.SCROLL_STOP_DELAY_MS);
+        log('Scroll event detected');
+        debouncedHighlight();
     }
 
     function observeDOMChanges() {
         const observer = new MutationObserver((mutations) => {
+            let shouldHighlight = false;
             mutations.forEach((mutation) => {
                 if (mutation.type === 'childList') {
                     mutation.addedNodes.forEach((node) => {
                         if (node.nodeType === Node.ELEMENT_NODE) {
                             if (node.tagName.toLowerCase() === 'article') {
                                 log('New article added directly');
-                                highlightSponsoredPromoted();
+                                shouldHighlight = true;
                             } else {
                                 const newArticles = node.querySelectorAll('article');
                                 if (newArticles.length > 0) {
                                     log(`${newArticles.length} new article(s) added within a container`);
-                                    highlightSponsoredPromoted();
+                                    shouldHighlight = true;
                                 }
                             }
                         }
                     });
                 }
             });
+            if (shouldHighlight) {
+                debouncedHighlight();
+            }
         });
 
         const targetNode = document.querySelector(SEARCH_RESULTS_SELECTOR);
