@@ -2,7 +2,7 @@
 // @name         Allegro Sponsored/Promoted Highlighter
 // @description  Highlight sponsored and promoted articles on Allegro search results with a simple overlay
 // @namespace    https://github.com/kamilsarelo
-// @version      28
+// @version      29
 // @author       kamilsarelo
 // @update       https://github.com/kamilsarelo/violentmonkey/raw/master/allegro.pl.promoted.user.js
 // @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
@@ -29,6 +29,7 @@
     const OVERLAY_CLASS = 'sponsored-promoted-overlay';
     const ARTICLE_CLASS = 'sponsored-promoted-article';
     const LOGGER_NAME = '[Allegro Highlighter]';
+    const SEARCH_RESULTS_SELECTOR = 'div[data-box-name="Items Container"]';
 
     // State variables
     let ENABLE_LOGGING = false;
@@ -155,11 +156,36 @@ ${LOGGER_NAME} Logging Control Instructions:
         }, CONFIG.SCROLL_STOP_DELAY_MS);
     }
 
+    function handleMutations(mutations) {
+        const hasNewArticles = mutations.some(mutation => {
+            return Array.from(mutation.addedNodes).some(node => 
+                node.nodeType === Node.ELEMENT_NODE && node.tagName.toLowerCase() === 'article'
+            );
+        });
+
+        if (hasNewArticles) {
+            log('New articles detected, running highlight process');
+            highlightSponsoredPromoted();
+        }
+    }
+
+    function setupMutationObserver() {
+        const targetNode = document.querySelector(SEARCH_RESULTS_SELECTOR);
+        if (targetNode) {
+            const observer = new MutationObserver(handleMutations);
+            observer.observe(targetNode, { childList: true, subtree: true });
+            log('MutationObserver set up for search results container');
+        } else {
+            log('Search results container not found, MutationObserver not set up');
+        }
+    }
+
     function init() {
         log('Initializing script');
         addStyle(customStyles);
         highlightSponsoredPromoted(); // Initial check
         window.addEventListener('scroll', handleScroll, { passive: true });
+        setupMutationObserver();
     }
 
     setTimeout(init, CONFIG.INITIAL_DELAY_MS);
