@@ -2,7 +2,7 @@
 // @name         Allegro Sponsored/Promoted Highlighter
 // @description  Highlight sponsored and promoted articles on Allegro search results with a simple overlay
 // @namespace    https://github.com/kamilsarelo
-// @version      29
+// @version      30
 // @author       kamilsarelo
 // @update       https://github.com/kamilsarelo/violentmonkey/raw/master/allegro.pl.promoted.user.js
 // @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
@@ -156,23 +156,30 @@ ${LOGGER_NAME} Logging Control Instructions:
         }, CONFIG.SCROLL_STOP_DELAY_MS);
     }
 
-    function handleMutations(mutations) {
-        const hasNewArticles = mutations.some(mutation => {
-            return Array.from(mutation.addedNodes).some(node => 
-                node.nodeType === Node.ELEMENT_NODE && node.tagName.toLowerCase() === 'article'
-            );
+    function observeDOMChanges() {
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'childList') {
+                    mutation.addedNodes.forEach((node) => {
+                        if (node.nodeType === Node.ELEMENT_NODE) {
+                            if (node.tagName.toLowerCase() === 'article') {
+                                log('New article added directly');
+                                highlightSponsoredPromoted();
+                            } else {
+                                const newArticles = node.querySelectorAll('article');
+                                if (newArticles.length > 0) {
+                                    log(`${newArticles.length} new article(s) added within a container`);
+                                    highlightSponsoredPromoted();
+                                }
+                            }
+                        }
+                    });
+                }
+            });
         });
 
-        if (hasNewArticles) {
-            log('New articles detected, running highlight process');
-            highlightSponsoredPromoted();
-        }
-    }
-
-    function setupMutationObserver() {
         const targetNode = document.querySelector(SEARCH_RESULTS_SELECTOR);
         if (targetNode) {
-            const observer = new MutationObserver(handleMutations);
             observer.observe(targetNode, { childList: true, subtree: true });
             log('MutationObserver set up for search results container');
         } else {
@@ -185,7 +192,7 @@ ${LOGGER_NAME} Logging Control Instructions:
         addStyle(customStyles);
         highlightSponsoredPromoted(); // Initial check
         window.addEventListener('scroll', handleScroll, { passive: true });
-        setupMutationObserver();
+        observeDOMChanges();
     }
 
     setTimeout(init, CONFIG.INITIAL_DELAY_MS);
