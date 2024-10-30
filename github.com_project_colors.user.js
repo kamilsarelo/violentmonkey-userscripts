@@ -2,7 +2,7 @@
 // @name         GitHub Project Stream Timeline Colorizer
 // @description  Colorizes GitHub project timeline bars based on their stream colors
 // @namespace    github-projects
-// @version      1
+// @version      2
 // @author       kamilsarelo
 // @update       https://github.com/kamilsarelo/violentmonkey/raw/master/github.com_project_colors.user.js
 // @grant        none
@@ -31,6 +31,13 @@
         };
     }
 
+    function needsColoring(targetSpan, colors) {
+        if (!targetSpan || !colors) return false;
+        const currentStyle = window.getComputedStyle(targetSpan);
+        return currentStyle.backgroundColor !== colors.backgroundColor || 
+               currentStyle.borderColor !== colors.borderColor;
+    }
+
     function colorizeTimelineBars() {
         const streamGroups = document.querySelectorAll('div[data-testid^="roadmap-group-"]');
         
@@ -45,7 +52,7 @@
                 if (!pillBackground) return;
                 
                 const targetSpan = pillBackground.querySelector('span');
-                if (targetSpan) {
+                if (targetSpan && needsColoring(targetSpan, colors)) {
                     targetSpan.style.backgroundColor = colors.backgroundColor;
                     targetSpan.style.borderColor = colors.borderColor;
                 }
@@ -53,49 +60,12 @@
         });
     }
 
-    function observeChanges() {
-        const observer = new MutationObserver((mutations) => {
-            let shouldUpdate = false;
-            mutations.forEach((mutation) => {
-                if (mutation.addedNodes.length) {
-                    mutation.addedNodes.forEach(node => {
-                        if (node.nodeType === 1 && (
-                            node.matches?.('div[data-testid^="roadmap-group-"]') ||
-                            node.matches?.('div[data-testid^="TableRow{index:"]') ||
-                            node.querySelector?.('[data-testid="roadmap-view-pill-background"]')
-                        )) {
-                            shouldUpdate = true;
-                        }
-                    });
-                }
-            });
-            
-            if (shouldUpdate) {
-                colorizeTimelineBars();
-            }
-        });
-
-        const container = document.querySelector('[data-testid="project-view-frame"]');
-        if (container) {
-            observer.observe(container, {
-                childList: true,
-                subtree: true,
-                attributes: true
-            });
-        }
-    }
-
     function init() {
-        const checkExists = setInterval(() => {
-            const streamGroups = document.querySelectorAll('div[data-testid^="roadmap-group-"]');
-            if (streamGroups.length > 0) {
-                clearInterval(checkExists);
-                colorizeTimelineBars();
-                observeChanges();
-            }
-        }, 100);
-
-        setTimeout(() => clearInterval(checkExists), 10000);
+        // Run immediately
+        colorizeTimelineBars();
+        
+        // Run periodically
+        setInterval(colorizeTimelineBars, 500);
     }
 
     init();
