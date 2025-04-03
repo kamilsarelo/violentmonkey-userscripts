@@ -2,7 +2,7 @@
 // @name         OpenRouter Wider Content
 // @description  Widens the main content area on openrouter.ai by modifying the .max-w-3xl class.
 // @namespace    https://github.com/kamilsarelo
-// @version      2
+// @version      3
 // @author       kamilsarelo
 // @update       https://github.com/kamilsarelo/violentmonkey/raw/master/openrouter.ai.user.js
 // @icon         https://openrouter.ai/favicon.ico
@@ -15,20 +15,17 @@
     'use strict';
 
     // Define the CSS rule to inject
-    // Use width to set a specific size, overriding min/max constraints.
-    // Use calc() for the dynamic width calculation.
-    // Use !important to ensure this rule takes precedence.
+    // We use calc() for the dynamic width calculation.
+    // We add !important to increase the chance of overriding the original style,
+    // especially important with utility CSS frameworks like Tailwind (which OpenRouter seems to use).
     const newCss = `
         .max-w-3xl {
-            width: calc(100% - 50px) !important;
-            /* Optionally, you might want to ensure max-width doesn't interfere,
-               though 'width' usually overrides 'max-width'. Setting it explicitly
-               can sometimes help avoid unexpected interactions. */
-            max-width: none !important; /* Usually redundant when 'width' is set, but safe */
+            min-width: calc(100% - 5rem) !important;
         }
     `;
 
     // Use GM_addStyle to inject the CSS into the page head
+    // This is the recommended way to add styles via userscripts
     GM_addStyle(newCss);
 
     // Optional: Log a message to the console to confirm the script ran
