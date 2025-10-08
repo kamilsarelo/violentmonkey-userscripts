@@ -2,7 +2,7 @@
 // @name         Google AI Studio UI Tweaks
 // @description  Applies a background color to user prompts and the input area, and removes the separator line for a cleaner look.
 // @namespace    https://github.com/kamilsarelo
-// @version      1
+// @version      2
 // @author       kamilsarelo
 // @update       https://github.com/kamilsarelo/violentmonkey/raw/master/google_ai_studio.user.js
 // @icon         https://www.gstatic.com/aistudio/ai_studio_favicon_2_32x32.png
@@ -15,10 +15,10 @@
 
     // --- Color Palette ---
     // Color for previous user prompts
-    const promptHighlightColor = 'rgb(230, 247, 255)'; // #E6F7FF
+    const promptHighlightColor = '#D4F3FB';
 
     // Color for the active input area
-    const inputHighlightColor = 'rgb(245, 240, 255)'; // #F5F0FF
+    const inputHighlightColor = '#D4F3FB';
 
 
     // This function finds the target elements and applies all UI tweaks.
@@ -30,6 +30,12 @@
             const parentDiv = promptDiv.parentElement;
             if (parentDiv && parentDiv.style.backgroundColor !== promptHighlightColor) {
                 parentDiv.style.backgroundColor = promptHighlightColor;
+            }
+
+            // Apply text color to the past prompt
+            const textWrapper = promptDiv.querySelector('ms-prompt-chunk.text-chunk');
+            if (textWrapper) {
+                textWrapper.style.setProperty('color', '#24628B', 'important');
             }
 
             // Find and remove the separator div inside the prompt
