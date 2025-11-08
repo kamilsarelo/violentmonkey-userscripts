@@ -2,7 +2,7 @@
 // @name         Video Controller
 // @description  Adds video speed controls below videos with global speed persistence, keyboard shortcuts, and a wide range of speed options (0.1x-16x)
 // @namespace    https://github.com/kamilsarelo
-// @version      1
+// @version      2
 // @author       kamilsarelo
 // @update       https://github.com/kamilsarelo/violentmonkey/raw/master/video-controller.user.js
 // @grant        GM_setValue
@@ -97,7 +97,9 @@
             fontSize: '14px',
             boxShadow: '0 -2px 10px rgba(0, 0, 0, 0.3)',
             transition: 'transform 0.3s ease',
-            transform: 'translateY(100%)' // Initially hidden
+            transform: 'translateY(100%)', // Initially hidden
+            textAlign: 'center',
+            boxSizing: 'border-box'
         });
 
         // Define styles
@@ -114,8 +116,10 @@
             transition: 'all 0.2s ease',
             outline: 'none',
             width: '100px',
+            height: '36px',
             textAlign: 'center',
-            boxSizing: 'border-box'
+            boxSizing: 'border-box',
+            margin: '0'
         };
         
         const hoverStyles = {
@@ -143,7 +147,8 @@
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'right 8px center',
             backgroundSize: '16px',
-            paddingRight: '30px'
+            paddingRight: '30px',
+            paddingLeft: '8px'
         });
         addInteractiveEvents(speedSelect, baseStyles, hoverStyles, focusStyles);
         
