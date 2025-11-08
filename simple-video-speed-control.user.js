@@ -2,7 +2,7 @@
 // @name         Simple Video Speed Control
 // @description  Simple speed controls for HTML5 videos with global speed persistence
 // @namespace    https://github.com/kamilsarelo
-// @version      2
+// @version      3
 // @author       kamilsarelo
 // @update       https://github.com/kamilsarelo/violentmonkey/raw/master/simple-video-speed-control.user.js
 // @grant        GM_setValue
