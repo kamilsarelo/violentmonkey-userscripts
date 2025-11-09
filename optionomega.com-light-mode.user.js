@@ -2,7 +2,7 @@
 // @name         Option Omega Light Mode
 // @description  Convert Option Omega's dark theme to light mode for better readability
 // @namespace    https://github.com/kamilsarelo
-// @version      1
+// @version      2
 // @author       kamilsarelo
 // @update       https://github.com/kamilsarelo/violentmonkey/raw/master/optionomega.com-light-mode.user.js
 // @match        https://optionomega.com/*
@@ -44,7 +44,6 @@
         }
         // Convert rgb(40, 40, 39) to light gray
         if (color === 'rgb(40, 40, 39)') {
-            // return '#f0f0f0';
             return '#eee';
         }
         // Convert calendar dark backgrounds to lighter shades
@@ -67,6 +66,11 @@
         const lightModeCSS = `
             /* Override dark hover state with light equivalent */
             .hover\\:bg-gray-800:hover { background-color: #e5e7eb !important; }
+            
+            /* Convert Option Omega logo to black */
+            img[src="/assets/icon_for_dark_background-DTj9qRve.png"] {
+                filter: brightness(0) grayscale(1) !important;
+            }
             
             /*
              * Canvas Chart Enhancement for Light Mode
@@ -92,11 +96,11 @@
                 filter: contrast(1.2) brightness(0.8) !important;
             }
         `;
-        
+
         const style = document.createElement('style');
         style.textContent = lightModeCSS;
         style.id = 'light-mode-styles';
-        
+
         const targetElement = document.head || document.documentElement;
         targetElement.appendChild(style);
     }
@@ -197,7 +201,7 @@
     function init() {
         // Inject light mode CSS styles and enhancements
         injectLightModeStyles();
-        
+
         // Process elements immediately (includes form styling)
         processElements();
 
