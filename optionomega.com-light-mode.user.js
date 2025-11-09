@@ -2,7 +2,7 @@
 // @name         Option Omega Light Mode
 // @description  Convert Option Omega's dark theme to light mode for better readability
 // @namespace    https://github.com/kamilsarelo
-// @version      2
+// @version      3
 // @author       kamilsarelo
 // @update       https://github.com/kamilsarelo/violentmonkey/raw/master/optionomega.com-light-mode.user.js
 // @match        https://optionomega.com/*
@@ -14,63 +14,162 @@
 (function () {
     'use strict';
 
-    // Common conversion for light gray to darker
-    function convertLightGrayToDark(color) {
-        if (color === 'rgb(229, 231, 235)') {
-            return '#4b5563';
+    // Configuration object for better maintainability
+    const CONFIG = {
+        // Color mappings for conversion
+        colorMaps: {
+            text: {
+                'rgb(255, 255, 255)': '#000000',
+                '#ffffff': '#000000',
+                '#fff': '#000000',
+                'rgb(229, 231, 235)': '#4b5563'
+            },
+            background: {
+                'rgb(0, 0, 0)': '#ffffff',
+                '#000000': '#ffffff',
+                '#000': '#ffffff',
+                'rgb(40, 40, 39)': '#eee'
+            },
+            border: {
+                'rgb(229, 231, 235)': '#4b5563'
+            }
+        },
+
+        // Selectors for elements to process
+        selectors: {
+            all: '*',
+            form: 'input:not([disabled]), select:not([disabled]):not(.selectInput--nested), textarea:not([disabled]), button.selectInput:not([disabled]):not(.selectInput--nested)',
+            exclude: '.vc-popover-content-wrapper'
+        },
+
+        // Performance settings
+        debounceDelay: 100,
+        processInterval: 2000,
+
+        // Form element styling
+        // formBackgroundColor: '#fefce8' // Very light blue
+        formBackgroundColor: '#e0f2fe' // Very light yellow
+    };
+
+    // Unified color conversion function
+    function convertColor(color, type) {
+        if (!color || color === 'rgba(0, 0, 0, 0)' || color === 'transparent') {
+            return color;
         }
-        return color;
+
+        const colorMap = CONFIG.colorMaps[type];
+        return colorMap[color] || color;
     }
 
-    // Function to convert white text to black
-    function convertTextColor(color) {
-        // Only convert pure white
-        if (color === 'rgb(255, 255, 255)' || color === '#ffffff' || color === '#fff') {
-            return '#000000';
+    // Process a single element for color conversion
+    function processElement(element) {
+        // Skip excluded elements
+        if (element.closest(CONFIG.selectors.exclude)) {
+            return;
         }
-        // Convert calendar light text colors to black
-        if (color === 'rgb(191, 219, 254)' || color === 'rgb(241, 245, 249)' || color === 'rgb(203, 213, 225)') {
-            return '#000000';
+
+        try {
+            const styles = window.getComputedStyle(element);
+
+            // Process background color with special handling for toggle buttons
+            const bgColor = styles.backgroundColor;
+            if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
+                if (element.classList.contains('toggle')) {
+                    const isToggleOff = element.classList.contains('bg-ooGray');
+                    if (isToggleOff) {
+                        const newBgColor = convertColor(bgColor, 'background');
+                        if (newBgColor !== bgColor) {
+                            element.style.backgroundColor = newBgColor;
+                        }
+                    } else {
+                        element.style.backgroundColor = '';
+                    }
+                } else {
+                    const newBgColor = convertColor(bgColor, 'background');
+                    if (newBgColor !== bgColor) {
+                        element.style.backgroundColor = newBgColor;
+                    }
+                }
+            }
+
+            // Process text color
+            const textColor = styles.color;
+            if (textColor && textColor !== 'rgba(0, 0, 0, 0)' && textColor !== 'transparent') {
+                const newTextColor = convertColor(textColor, 'text');
+                if (newTextColor !== textColor) {
+                    element.style.color = newTextColor;
+                }
+            }
+
+            // Process border color
+            const borderColor = styles.borderColor;
+            if (borderColor && borderColor !== 'rgba(0, 0, 0, 0)' && borderColor !== 'transparent') {
+                const newBorderColor = convertColor(borderColor, 'border');
+                if (newBorderColor !== borderColor) {
+                    element.style.borderColor = newBorderColor;
+                }
+            }
+        } catch (e) {
+            console.debug('Error processing element:', e);
         }
-        // Convert light gray to slightly darker
-        return convertLightGrayToDark(color);
     }
 
-    // Function to convert specific dark backgrounds to light
-    function convertBackgroundColor(color) {
-        // Convert pure black to white
-        if (color === 'rgb(0, 0, 0)' || color === '#000000' || color === '#000') {
-            return '#ffffff';
-        }
-        // Convert rgb(40, 40, 39) to light gray
-        if (color === 'rgb(40, 40, 39)') {
-            return '#eee';
-        }
-        // Convert calendar dark backgrounds to lighter shades
-        if (color === 'rgb(15, 23, 42)') {
-            return 'rgb(241, 245, 249)'; // Light slate blue-gray
-        }
-        if (color === 'rgb(30, 41, 59)') {
-            return 'rgb(241, 245, 249)'; // Light slate blue-gray
-        }
-        return color;
+    // Process all elements with performance optimization
+    function processElements() {
+        // Process all elements
+        document.querySelectorAll(CONFIG.selectors.all).forEach(processElement);
+
+        // Apply special styling to form elements
+        document.querySelectorAll(CONFIG.selectors.form).forEach(element => {
+            element.style.backgroundColor = CONFIG.formBackgroundColor;
+        });
     }
 
-    // Function to convert light borders to darker
-    function convertBorderColor(color) {
-        return convertLightGrayToDark(color);
+    // Debounced function to handle rapid DOM changes
+    const debouncedProcess = (function () {
+        let timeoutId;
+        return function () {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(processElements, CONFIG.debounceDelay);
+        };
+    })();
+
+    // Set up mutation observer for dynamic content
+    function setupMutationObserver() {
+        const observer = new MutationObserver(function (mutations) {
+            let shouldProcess = false;
+
+            mutations.forEach(function (mutation) {
+                if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                    shouldProcess = true;
+                }
+            });
+
+            if (shouldProcess) {
+                debouncedProcess();
+            }
+        });
+
+        if (document.body) {
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+        }
+
+        return observer;
     }
 
-    // Function to inject light mode CSS overrides and enhancements
+    // Inject light mode CSS styles
     function injectLightModeStyles() {
         const lightModeCSS = `
-            /* Override dark hover state with light equivalent */
-            .hover\\:bg-gray-800:hover { background-color: #e5e7eb !important; }
-            
             /* Convert Option Omega logo to black */
             img[src="/assets/icon_for_dark_background-DTj9qRve.png"] {
                 filter: brightness(0) grayscale(1) !important;
             }
+            
+            /* Override dark hover state in "Test List" and "Test Trade Log" with light equivalent */
+            .hover\\:bg-gray-800:hover { background-color: #e5e7eb !important; }
             
             /*
              * Canvas Chart Enhancement for Light Mode
@@ -91,9 +190,62 @@
              * - brightness(0.8): Optimizes canvas visibility in light theme
              * - Combined effect: Improves text contrast while preserving data visualization
              */
-
             canvas {
                 filter: contrast(1.2) brightness(0.8) !important;
+            }
+
+            /* VCalendar light mode - replace vc-dark with vc-light */
+            .vc-popover-content-wrapper * {
+                --vc-color: var(--vc-gray-900);
+                --vc-bg: var(--vc-white);
+                --vc-border: var(--vc-gray-300);
+                --vc-hover-bg: hsla(211, 25%, 84%, 0.3);
+                --vc-focus-ring: 0 0 0 2px rgb(59, 131, 246, 0.4);
+                --vc-header-arrow-color: var(--vc-gray-500);
+                --vc-header-arrow-hover-bg: var(--vc-gray-200);
+                --vc-header-title-color: var(--vc-gray-900);
+                --vc-weekday-color: var(--vc-gray-500);
+                --vc-weeknumber-color: var(--vc-gray-400);
+                --vc-nav-hover-bg: var(--vc-gray-200);
+                --vc-nav-title-color: var(--vc-gray-900);
+                --vc-nav-item-hover-box-shadow: none;
+                --vc-nav-item-active-color: var(--vc-white);
+                --vc-nav-item-active-bg: var(--vc-accent-500);
+                --vc-nav-item-active-box-shadow: var(--vc-shadow);
+                --vc-nav-item-current-color: var(--vc-accent-600);
+                --vc-day-popover-container-color: var(--vc-white);
+                --vc-day-popover-container-bg: var(--vc-gray-800);
+                --vc-day-popover-container-border: var(--vc-gray-700);
+                --vc-day-popover-header-color: var(--vc-gray-700);
+                --vc-popover-content-color: var(--vc-gray-900);
+                --vc-popover-content-bg: var(--vc-gray-50);
+                --vc-popover-content-border: var(--vc-gray-300);
+                --vc-time-picker-border: var(--vc-gray-300);
+                --vc-time-weekday-color: var(--vc-gray-700);
+                --vc-time-month-color: var(--vc-accent-600);
+                --vc-time-day-color: var(--vc-accent-600);
+                --vc-time-year-color: var(--vc-gray-500);
+                --vc-time-select-group-bg: var(--vc-gray-50);
+                --vc-time-select-group-border: var(--vc-gray-300);
+                --vc-time-select-group-icon-color: var(--vc-accent-500);
+                --vc-select-color: var(--vc-gray-900);
+                --vc-select-bg: var(--vc-gray-100);
+                --vc-select-hover-bg: var(--vc-gray-200);
+                --vc-day-content-hover-bg: var(--vc-hover-bg);
+                --vc-day-content-disabled-color: var(--vc-gray-400);
+            }
+            .vc-popover-content-wrapper.vc-attr *,
+            .vc-popover-content-wrapper .vc-attr * {
+                --vc-content-color: var(--vc-accent-600);
+                --vc-highlight-outline-bg: var(--vc-white);
+                --vc-highlight-outline-border: var(--vc-accent-600);
+                --vc-highlight-outline-content-color: var(--vc-accent-700);
+                --vc-highlight-light-bg: var(--vc-accent-200);
+                --vc-highlight-light-content-color: var(--vc-accent-900);
+                --vc-highlight-solid-bg: var(--vc-accent-600);
+                --vc-highlight-solid-content-color: var(--vc-white);
+                --vc-dot-bg: var(--vc-accent-600);
+                --vc-bar-bg: var(--vc-accent-600);
             }
         `;
 
@@ -105,108 +257,12 @@
         targetElement.appendChild(style);
     }
 
-    // Function to process all elements and convert their colors
-    function processElements() {
-        const allElements = document.querySelectorAll('*');
-        const formElements = document.querySelectorAll(''
-            + 'input:not([disabled]), '
-            + 'select:not([disabled]):not(.selectInput--nested), '
-            + 'textarea:not([disabled]), '
-            + 'button.selectInput:not([disabled]):not(.selectInput--nested)'
-        );
-
-        allElements.forEach(element => {
-            try {
-                const styles = window.getComputedStyle(element);
-
-                // Check and convert background color
-                const bgColor = styles.backgroundColor;
-                if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
-                    // Handle toggle buttons specially
-                    if (element.classList.contains('toggle')) {
-                        const isToggleOff = element.classList.contains('bg-ooGray');
-                        if (isToggleOff) {
-                            // Apply conversion when OFF (has bg-ooGray class)
-                            const newBgColor = convertBackgroundColor(bgColor);
-                            if (newBgColor !== bgColor) {
-                                element.style.backgroundColor = newBgColor;
-                            }
-                        } else {
-                            // Restore original style when ON (no bg-ooGray class)
-                            element.style.backgroundColor = '';
-                        }
-                    } else {
-                        // Normal conversion for non-toggle elements
-                        const newBgColor = convertBackgroundColor(bgColor);
-                        if (newBgColor !== bgColor) {
-                            element.style.backgroundColor = newBgColor;
-                        }
-                    }
-                }
-
-                // Check and convert text color
-                const textColor = styles.color;
-                if (textColor && textColor !== 'rgba(0, 0, 0, 0)' && textColor !== 'transparent') {
-                    const newTextColor = convertTextColor(textColor);
-                    if (newTextColor !== textColor) {
-                        element.style.color = newTextColor;
-                    }
-                }
-
-                // Check and convert border color
-                const borderColor = styles.borderColor;
-                if (borderColor && borderColor !== 'rgba(0, 0, 0, 0)' && borderColor !== 'transparent') {
-                    const newBorderColor = convertBorderColor(borderColor);
-                    if (newBorderColor !== borderColor) {
-                        element.style.borderColor = newBorderColor;
-                    }
-                }
-            } catch (e) {
-                // Skip elements that can't be styled
-                console.debug('Error processing element:', e);
-            }
-        });
-
-        // Apply amber background to form elements
-        formElements.forEach(element => {
-            element.style.backgroundColor = '#fef3c7'; // Light amber
-        });
-    }
-
-    // Function to handle dynamic content
-    function handleDynamicContent() {
-        // Create a mutation observer to handle dynamically loaded content
-        const observer = new MutationObserver(function (mutations) {
-            mutations.forEach(function (mutation) {
-                if (mutation.type === 'childList') {
-                    // Process new elements after a short delay to allow styles to be applied
-                    // 100ms gives browser time to apply CSS styles before we process them
-                    setTimeout(processElements, 100);
-                }
-            });
-        });
-
-        // Start observing document body for changes
-        if (document.body) {
-            observer.observe(document.body, {
-                childList: true,
-                subtree: true
-            });
-        }
-
-        return observer;
-    }
-
-    // Initialize userscript
+    // Initialize userscript (single entry point)
     function init() {
-        // Inject light mode CSS styles and enhancements
         injectLightModeStyles();
-
-        // Process elements immediately (includes form styling)
         processElements();
 
-        // Set up mutation observer for dynamic content
-        const observer = handleDynamicContent();
+        const observer = setupMutationObserver();
 
         // Clean up observer when page unloads
         window.addEventListener('beforeunload', function () {
@@ -215,23 +271,17 @@
             }
         });
 
-        // Re-process elements periodically to catch any missed changes
-        // 2000ms (2 seconds) balances responsiveness with performance
-        // MutationObserver handles most real-time changes, this catches edge cases
-        setInterval(processElements, 2000);
+        // Process elements periodically for edge cases
+        setInterval(processElements, CONFIG.processInterval);
 
-        // Also process when window gains focus (in case tab was inactive)
+        // Process when window gains focus
         window.addEventListener('focus', processElements);
     }
 
-    // Wait for DOM to be ready
+    // Initialize when DOM is ready or immediately if already loaded
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
     } else {
         init();
     }
-
-    // Also run immediately for fast injection
-    init();
-
 })();
