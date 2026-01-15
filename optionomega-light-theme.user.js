@@ -1,10 +1,10 @@
 // ==UserScript==
-// @name         Option Omega Light Mode
-// @description  Convert Option Omega's dark theme to light mode for better readability
+// @name         Option Omega Light Theme
+// @description  Convert Option Omega's default dark theme to light mode for better readability
 // @namespace    https://github.com/kamilsarelo
-// @version      3
+// @version      4
 // @author       kamilsarelo
-// @update       https://github.com/kamilsarelo/violentmonkey/raw/master/optionomega.com-light-mode.user.js
+// @update       https://github.com/kamilsarelo/violentmonkey/raw/master/optionomega-light-theme.user.js
 // @match        https://optionomega.com/*
 // @match        https://www.optionomega.com/*
 // @grant        GM_addStyle
@@ -160,9 +160,9 @@
         return observer;
     }
 
-    // Inject light mode CSS styles
-    function injectLightModeStyles() {
-        const lightModeCSS = `
+    // Inject light theme CSS styles
+    function injectLightThemeStyles() {
+        const lightThemeCSS = `
             /* Convert Option Omega logo to black */
             img[src="/assets/icon_for_dark_background-DTj9qRve.png"] {
                 filter: brightness(0) grayscale(1) !important;
@@ -172,7 +172,7 @@
             .hover\\:bg-gray-800:hover { background-color: #e5e7eb !important; }
             
             /*
-             * Canvas Chart Enhancement for Light Mode
+             * Canvas Chart Enhancement for Light Theme
              *
              * Rationale for CSS filter approach:
              * 1. Canvas renders as pixels - inaccessible to DOM manipulation
@@ -194,7 +194,8 @@
                 filter: contrast(1.2) brightness(0.8) !important;
             }
 
-            /* VCalendar light mode - replace vc-dark with vc-light */
+            /* VCalendar light theme - replace vc-dark with vc-light */
+            /* see: https://github.com/nathanreyes/v-calendar/blob/v3/src/styles/theme.css */
             .vc-popover-content-wrapper * {
                 --vc-color: var(--vc-gray-900);
                 --vc-bg: var(--vc-white);
@@ -250,8 +251,8 @@
         `;
 
         const style = document.createElement('style');
-        style.textContent = lightModeCSS;
-        style.id = 'light-mode-styles';
+        style.textContent = lightThemeCSS;
+        style.id = 'light-theme-styles';
 
         const targetElement = document.head || document.documentElement;
         targetElement.appendChild(style);
@@ -259,7 +260,7 @@
 
     // Initialize userscript (single entry point)
     function init() {
-        injectLightModeStyles();
+        injectLightThemeStyles();
         processElements();
 
         const observer = setupMutationObserver();
