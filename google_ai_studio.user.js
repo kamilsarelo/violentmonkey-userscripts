@@ -2,7 +2,7 @@
 // @name         Google AI Studio UI Tweaks
 // @description  Applies a background color to user prompts and the input area, and removes the separator line for a cleaner look.
 // @namespace    https://github.com/kamilsarelo
-// @version      3
+// @version      4
 // @author       kamilsarelo
 // @update       https://github.com/kamilsarelo/violentmonkey/raw/master/google_ai_studio.user.js
 // @icon         https://www.gstatic.com/aistudio/ai_studio_favicon_2_32x32.png
@@ -39,11 +39,11 @@
                 textWrapper.style.setProperty('color', '#24628B', 'important');
             }
 
-            // Remove the separator
-            const separator = turn.querySelector('div.turn-separator');
-            if (separator) {
-                separator.remove();
-            }
+//            // Remove the separator
+//            const separator = turn.querySelector('div.turn-separator');
+//            if (separator) {
+//                separator.remove();
+//            }
         });
 
         // --- Task 3: Style the main prompt input wrapper ---
