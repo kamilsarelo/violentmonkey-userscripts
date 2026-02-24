@@ -16,7 +16,7 @@ FEATURES:
     - Modifies @namespace to distinguish from production
     - Uses milliseconds since epoch as @version (always increases, survives restarts)
     - CORS enabled for userscript manager update checks
-    - Sorted script list on overview page
+    - Auto-discovers test pages (files ending with -helper.html are hidden)
     - Graceful shutdown on Ctrl+C (SIGINT) or SIGTERM
 
 REQUIREMENTS:
@@ -38,12 +38,6 @@ DEV_NAMESPACE_SUFFIX = "/dev"
 SCRIPTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src")
 TEST_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "test")
 
-TEST_PAGES = {
-    "media-user-override-test-basic.html": "Basic Video - Single video element",
-    "media-user-override-test-audio.html": "Audio - Single audio element",
-    "media-user-override-test-multiple.html": "Multiple - Multiple media elements",
-    "media-user-override-test-short.html": "Short Media - Media &lt;5s (ignored)",
-}
 
 
 def get_local_ip():
@@ -65,6 +59,18 @@ LOCAL_IP = get_local_ip()
 def get_scripts():
     """Get sorted list of userscript filenames."""
     return sorted(f for f in os.listdir(SCRIPTS_DIR) if f.endswith(".user.js"))
+
+
+# Helper pages are served but not listed on homepage (filename ends with -helper.html)
+# They are still accessible via direct URL when needed for tests
+def get_test_pages():
+    """Get sorted list of test page filenames, excluding helper files."""
+    try:
+        files = os.listdir(TEST_DIR)
+        # Filter: .html files that don't end with -helper.html
+        return sorted(f for f in files if f.endswith(".html") and not f.endswith("-helper.html"))
+    except Exception:
+        return []
 
 
 def process_script(filepath):
@@ -126,9 +132,10 @@ class DevHandler(http.server.SimpleHTTPRequestHandler):
             self.serve_index()
             return
 
-        # Serve test pages
-        if url_path.endswith(".html") and url_path.lstrip("/") in TEST_PAGES:
-            filepath = os.path.join(TEST_DIR, url_path.lstrip("/"))
+        # Serve test pages (including helper files not listed on homepage)
+        if url_path.endswith(".html"):
+            filename = url_path.lstrip("/")
+            filepath = os.path.join(TEST_DIR, filename)
             if os.path.exists(filepath):
                 self.serve_test_page(filepath)
                 return
@@ -150,7 +157,7 @@ class DevHandler(http.server.SimpleHTTPRequestHandler):
 
     def serve_index(self):
         """Serve index page with list of available scripts and test pages."""
-        test_links = ''.join(f'<li><a href="/{f}">{TEST_PAGES[f]}</a></li>' for f in TEST_PAGES)
+        test_links = ''.join(f'<li><a href="/{f}">{f}</a></li>' for f in get_test_pages())
         html = f"""<!DOCTYPE html>
 <html>
 <head>

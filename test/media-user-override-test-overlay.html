@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Overlay Video Test - Media User Override</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .back { display: block; margin-bottom: 20px; }
+        
+        .test-section { margin-bottom: 30px; border: 1px solid #ddd; padding: 15px; border-radius: 8px; }
+        .test-section h3 { margin-top: 0; }
+        
+        /* Hover overlay styles */
+        .hover-container { position: relative; display: inline-block; }
+        .hover-trigger { 
+            padding: 20px 40px; 
+            background: #007bff; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .hover-trigger:hover { background: #0056b3; }
+        
+        .hover-overlay {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 400px;
+            background: #222;
+            border-radius: 8px;
+            padding: 10px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .hover-overlay video { width: 100%; border-radius: 4px; }
+        .hover-container:hover .hover-overlay,
+        .hover-overlay:hover {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* Modal overlay styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .modal-overlay.visible { display: flex; }
+        .modal-content {
+            background: #222;
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+        }
+        .modal-content video { width: 100%; }
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+        }
+        
+        /* Floating video widget */
+        .floating-video {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 300px;
+            background: #222;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            z-index: 1500;
+            display: none;
+        }
+        .floating-video.visible { display: block; }
+        .floating-video video { width: 100%; }
+        .floating-video-header {
+            padding: 8px 12px;
+            background: #333;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+        }
+        
+        .note { background: #fff3cd; padding: 10px; border-radius: 4px; margin-top: 10px; font-size: 14px; }
+        
+        .btn { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <a class="back" href="/">← Back to Home</a>
+    <h1>Overlay Video Test</h1>
+    <p>Testing video control in various overlay/container scenarios. The control bar should appear at the bottom of the page for all videos.</p>
+    
+    <div class="test-section">
+        <h3>Hover Overlay with Video</h3>
+        <p>Hover over the button to reveal a video overlay:</p>
+        <div class="hover-container">
+            <button class="hover-trigger">Hover to show video</button>
+            <div class="hover-overlay">
+                <video controls>
+                    <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+                </video>
+                <div class="note" style="margin-top: 5px; font-size: 12px;">Video in hover overlay</div>
+            </div>
+        </div>
+        <div class="note">⚠️ Play the video in the hover overlay. The control bar should appear at the bottom of this page.</div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Modal Overlay with Video</h3>
+        <p>Click to open a modal with video:</p>
+        <button class="btn" onclick="openModal()">Open Video Modal</button>
+        <div class="note">⚠️ The control bar should work with the modal video while modal is open.</div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Floating Video Widget</h3>
+        <p>Toggle a floating video widget (like a mini-player):</p>
+        <button class="btn" onclick="toggleFloating()">Toggle Floating Video</button>
+        <div class="note">⚠️ The floating video should be controllable via the main control bar.</div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Dynamically Added Video</h3>
+        <p>Test that videos added to the DOM after page load are detected:</p>
+        <button class="btn" onclick="addDynamicVideo()">Add Video Dynamically</button>
+        <div id="dynamic-container"></div>
+    </div>
+    
+    <!-- Modal Overlay -->
+    <div class="modal-overlay" id="videoModal" onclick="closeModal(event)">
+        <button class="modal-close" onclick="closeModal(event)">×</button>
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h4 style="color: white; margin: 0 0 10px 0;">Modal Video</h4>
+            <video id="modalVideo" controls>
+                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4" type="video/mp4">
+            </video>
+        </div>
+    </div>
+    
+    <!-- Floating Video Widget -->
+    <div class="floating-video" id="floatingVideo">
+        <div class="floating-video-header">
+            <span>Mini Player</span>
+            <button onclick="toggleFloating()" style="background: none; border: none; color: white; cursor: pointer;">×</button>
+        </div>
+        <video id="floatingVideoElement" controls>
+            <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+        </video>
+    </div>
+    
+    <script>
+        function openModal() {
+            document.getElementById('videoModal').classList.add('visible');
+        }
+        
+        function closeModal(e) {
+            if (e.target.classList.contains('modal-overlay') || e.target.classList.contains('modal-close')) {
+                document.getElementById('videoModal').classList.remove('visible');
+            }
+        }
+        
+        function toggleFloating() {
+            const floating = document.getElementById('floatingVideo');
+            floating.classList.toggle('visible');
+        }
+        
+        function addDynamicVideo() {
+            const container = document.getElementById('dynamic-container');
+            const wrapper = document.createElement('div');
+            wrapper.style.marginTop = '15px';
+            wrapper.innerHTML = `
+                <h4>Dynamically Added Video</h4>
+                <video controls style="width: 100%; max-width: 400px; background: #000;">
+                    <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+                </video>
+            `;
+            container.appendChild(wrapper);
+        }
+    </script>
+</body>
+</html>
