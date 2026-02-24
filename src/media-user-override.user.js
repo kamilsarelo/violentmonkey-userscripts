@@ -7,7 +7,7 @@
 // @match        *://*/*
 // @grant        GM_setValue
 // @grant        GM_getValue
-// @noframes     true
+// @noframes     false
 // ==/UserScript==
 
 /**
@@ -23,6 +23,7 @@
  * FEATURES
  * --------
  * - Works with both <video> and <audio> elements
+ * - Controls media in same-origin iframes from top-level document
  * - No keyboard hotkeys (avoids conflicts with browser/site shortcuts)
  * - Play/Pause toggle button with dynamic icon
  * - Speed control combo: [Slower ◀◀] [Speed Text] [Faster ▶▶]
@@ -56,7 +57,9 @@
  * 
  * EDGE CASES HANDLED
  * ------------------
- * - Iframe isolation: @noframes + runtime check prevents duplicate bars in iframes
+ * - Iframe support: Control bar in top-level only, detects media in same-origin iframes
+ * - Cross-origin iframes: Gracefully skipped (cannot access content)
+ * - Nested iframes: Recursively detected and controlled
  * - Show on play only: Bar hidden until media starts playing
  * - Multiple media: Most recent playing media becomes active
  * - Short media: Ignores media < 5 seconds (notification sounds, etc.)
@@ -91,10 +94,12 @@
 (function () {
     'use strict';
 
-    // Skip if in iframe
-    if (window.self !== window.top) {
-        console.log('[Media User Override] Skipping iframe');
-        return;
+    // Skip control bar creation if in iframe - only top-level document gets the bar
+    const isTopLevel = window.self === window.top;
+    
+    if (!isTopLevel) {
+        console.log('[Media User Override] Running in iframe mode - no control bar');
+        // Don't return - we still need to set up communication with parent
     }
 
     // Constants
@@ -119,7 +124,9 @@
     let controlBar = null;
     let shadowRoot = null;
     let activeMedia = null;
+    let activeMediaInfo = null; // { media, iframeId, window }
     let allMedia = new Set();
+    let iframeMediaMap = new Map(); // Map of iframe -> Set of media elements
     let hideTimeout = null;
     let currentSpeed = 1;
     let overflowItems = [];
@@ -405,6 +412,8 @@
     // ==================== Control Bar Creation ====================
 
     function createControlBar() {
+        // Only create control bar in top-level document
+        if (!isTopLevel) return null;
         if (controlBar) return controlBar;
 
         controlBar = document.createElement('div');
@@ -716,14 +725,21 @@
 
     // ==================== Media Management ====================
 
-    function registerMedia(media) {
+    function registerMedia(media, iframe = null) {
         if (allMedia.has(media)) return;
         
         allMedia.add(media);
-        console.log('[Media User Override] Registered media:', media);
+        
+        // Track which iframe this media belongs to
+        if (iframe && iframeMediaMap.has(iframe)) {
+            iframeMediaMap.get(iframe).add(media);
+        }
+        
+        const location = iframe ? 'iframe' : 'top-level';
+        console.log(`[Media User Override] Registered media in ${location}:`, media);
 
         // Event listeners
-        media.addEventListener('play', () => setActiveMedia(media));
+        media.addEventListener('play', () => setActiveMedia(media, iframe));
         media.addEventListener('pause', updatePlayPauseButton);
         media.addEventListener('playing', updatePlayPauseButton);
         media.addEventListener('timeupdate', updateProgress);
@@ -734,13 +750,38 @@
             }
         });
 
-        // Handle media removal
-        const observer = new MutationObserver(() => {
-            if (!document.contains(media)) {
-                unregisterMedia(media);
+        // Handle media removal - different approach for iframe media
+        if (iframe) {
+            // For iframe media, we need to check if the iframe still contains the media
+            const checkRemoval = () => {
+                try {
+                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    if (!iframeDoc || !iframeDoc.contains(media)) {
+                        unregisterMedia(media);
+                    }
+                } catch (e) {
+                    // Iframe became cross-origin or was removed
+                    unregisterMedia(media);
+                }
+            };
+            
+            // Use MutationObserver on the iframe's document if possible
+            try {
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                const observer = new MutationObserver(checkRemoval);
+                observer.observe(iframeDoc.body, { childList: true, subtree: true });
+            } catch (e) {
+                // Can't observe cross-origin iframe
             }
-        });
-        observer.observe(document.body, { childList: true, subtree: true });
+        } else {
+            // Top-level document media
+            const observer = new MutationObserver(() => {
+                if (!document.contains(media)) {
+                    unregisterMedia(media);
+                }
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+        }
     }
 
     function unregisterMedia(media) {
@@ -749,56 +790,134 @@
 
         if (activeMedia === media) {
             activeMedia = null;
+            activeMediaInfo = null;
             // Check if any other media is playing
             const playingMedia = Array.from(allMedia).find(m => !m.paused);
             if (playingMedia) {
-                setActiveMedia(playingMedia);
+                // Find the iframe for this media if any
+                let mediaIframe = null;
+                for (const [iframe, mediaSet] of iframeMediaMap) {
+                    if (mediaSet.has(playingMedia)) {
+                        mediaIframe = iframe;
+                        break;
+                    }
+                }
+                setActiveMedia(playingMedia, mediaIframe);
             } else {
                 hideControlBar(0); // Hide immediately
             }
         }
     }
 
-    function setActiveMedia(media) {
+    function setActiveMedia(media, iframe = null) {
         // Filter out short media
         if (media.duration > 0 && media.duration < MIN_DURATION) {
             return;
         }
 
         activeMedia = media;
-        console.log('[Media User Override] Active media:', media);
+        activeMediaInfo = { media, iframe };
+        
+        const location = iframe ? 'iframe' : 'top-level';
+        console.log(`[Media User Override] Active media (${location}):`, media);
 
-        // Ensure control bar exists before updating UI
-        showControlBar();
+        // Ensure control bar exists before updating UI (only in top-level)
+        if (isTopLevel) {
+            showControlBar();
 
-        // Apply saved speed
-        if (media.playbackRate !== currentSpeed) {
-            media.playbackRate = currentSpeed;
+            // Apply saved speed
+            if (media.playbackRate !== currentSpeed) {
+                media.playbackRate = currentSpeed;
+            }
+
+            // Update UI
+            speedText.textContent = media.playbackRate + 'x';
+            updatePlayPauseButton();
+            updateProgress();
+            updateBuffered();
         }
-
-        // Update UI
-        speedText.textContent = media.playbackRate + 'x';
-        updatePlayPauseButton();
-        updateProgress();
-        updateBuffered();
     }
 
     // ==================== Media Detection ====================
 
     function detectMedia() {
+        // Detect media in main document
         const mediaElements = document.querySelectorAll('video, audio');
         
         mediaElements.forEach(media => {
             if (!media.dataset.mediaUserOverride) {
                 media.dataset.mediaUserOverride = 'true';
-                registerMedia(media);
+                registerMedia(media, null); // null = top-level document
 
                 // If already playing, set as active
                 if (!media.paused && media.duration >= MIN_DURATION) {
-                    setActiveMedia(media);
+                    setActiveMedia(media, null);
                 }
             }
         });
+
+        // Detect media in same-origin iframes
+        detectIframeMedia();
+    }
+
+    function detectIframeMedia(rootDoc = document, parentIframe = null, depth = 0) {
+        const iframes = rootDoc.querySelectorAll('iframe');
+        const indent = '  '.repeat(depth);
+        
+        iframes.forEach((iframe, index) => {
+            try {
+                // Only access same-origin iframes
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                if (!iframeDoc) return;
+
+                const iframeMedia = iframeDoc.querySelectorAll('video, audio');
+                
+                iframeMedia.forEach(media => {
+                    if (!media.dataset.mediaUserOverride) {
+                        media.dataset.mediaUserOverride = 'true';
+                        // Use the top-most parent iframe for tracking, or this iframe if no parent
+                        const trackingIframe = parentIframe || iframe;
+                        registerMedia(media, trackingIframe);
+
+                        // If already playing, set as active
+                        if (!media.paused && media.duration >= MIN_DURATION) {
+                            setActiveMedia(media, trackingIframe);
+                        }
+                    }
+                });
+
+                // Track iframe for later cleanup (only at top level)
+                if (depth === 0 && !iframeMediaMap.has(iframe)) {
+                    iframeMediaMap.set(iframe, new Set());
+                    observeIframe(iframe);
+                }
+
+                console.log(`${indent}[Media User Override] Found ${iframeMedia.length} media elements in iframe ${index} (depth ${depth})`);
+
+                // Recursively scan nested iframes
+                detectIframeMedia(iframeDoc, parentIframe || iframe, depth + 1);
+                
+            } catch (e) {
+                // Cross-origin iframe - cannot access
+                console.log(`${indent}[Media User Override] Cannot access iframe ${index} (cross-origin or not loaded)`);
+            }
+        });
+    }
+
+    function observeIframe(iframe) {
+        // Watch for iframe removal
+        const observer = new MutationObserver(() => {
+            if (!document.contains(iframe)) {
+                // Clean up all media from this iframe
+                const mediaSet = iframeMediaMap.get(iframe);
+                if (mediaSet) {
+                    mediaSet.forEach(media => unregisterMedia(media));
+                    iframeMediaMap.delete(iframe);
+                }
+                observer.disconnect();
+            }
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
     }
 
     // ==================== Utilities ====================
@@ -819,19 +938,20 @@
     // ==================== Initialization ====================
 
     function init() {
-        console.log('[Media User Override] Initializing...');
+        console.log('[Media User Override] Initializing...', isTopLevel ? '(top-level)' : '(iframe)');
         
         // Initial detection
         detectMedia();
 
-        // Observe for new media elements
+        // Observe for new media elements and iframes
         const observer = new MutationObserver((mutations) => {
             const shouldDetect = mutations.some(mutation =>
                 mutation.type === 'childList' &&
                 Array.from(mutation.addedNodes).some(node =>
                     node.nodeName === 'VIDEO' || 
                     node.nodeName === 'AUDIO' ||
-                    (node.querySelectorAll && node.querySelectorAll('video, audio').length > 0)
+                    node.nodeName === 'IFRAME' ||
+                    (node.querySelectorAll && node.querySelectorAll('video, audio, iframe').length > 0)
                 )
             );
 
@@ -844,6 +964,15 @@
             childList: true,
             subtree: true
         });
+
+        // Also listen for iframe load events (for dynamically created iframes)
+        document.addEventListener('load', (e) => {
+            if (e.target.tagName === 'IFRAME') {
+                console.log('[Media User Override] Iframe loaded:', e.target);
+                // Give the iframe a moment to initialize
+                setTimeout(() => detectIframeMedia(), 100);
+            }
+        }, true); // Use capture phase to catch iframe load events
 
         console.log('[Media User Override] Ready');
     }

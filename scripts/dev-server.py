@@ -23,6 +23,11 @@ REQUIREMENTS:
     Python 3.7+ (standard library only, no external dependencies)
 """
 
+
+# ==================================================================================================
+# Imports
+# ==================================================================================================
+
 import http.server
 import os
 import re
@@ -30,6 +35,11 @@ import socket
 import signal
 import threading
 import time
+
+
+# ==================================================================================================
+# Constants
+# ==================================================================================================
 
 PORT = 8080
 DEV_PREFIX = "[DEV] "
@@ -39,6 +49,9 @@ SCRIPTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "sr
 TEST_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "test")
 
 
+# ==================================================================================================
+# Functions
+# ==================================================================================================
 
 def get_local_ip():
     """Get local IP address for serving to other devices in WLAN."""
@@ -53,6 +66,7 @@ def get_local_ip():
     return ip
 
 
+# Cache the local IP
 LOCAL_IP = get_local_ip()
 
 
@@ -130,6 +144,11 @@ class DevHandler(http.server.SimpleHTTPRequestHandler):
         # Serve index page listing all scripts and tests
         if url_path == "/" or url_path == "/index.html":
             self.serve_index()
+            return
+
+        # Serve generated identicon favicon
+        if url_path == "/favicon.ico":
+            self.serve_favicon()
             return
 
         # Serve test pages (including helper files not listed on homepage)
@@ -224,6 +243,11 @@ class DevHandler(http.server.SimpleHTTPRequestHandler):
         except Exception as e:
             self.send_error(500, f"Error serving test page: {e}")
 
+    def serve_favicon(self):
+        """Return 204 No Content for favicon requests."""
+        self.send_response(204)
+        self.end_headers()
+
     def log_message(self, format, *args):
         """Custom logging format with version for userscripts."""
         url_path = self.path.split("?")[0]
@@ -232,6 +256,10 @@ class DevHandler(http.server.SimpleHTTPRequestHandler):
             return
         print(f"[{self.address_string()}] {args[0]}")
 
+
+# ==================================================================================================
+# Main Entry Point
+# ==================================================================================================
 
 def main():
     httpd = http.server.ThreadingHTTPServer(("", PORT), DevHandler)
