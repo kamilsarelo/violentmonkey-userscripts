@@ -1,14 +1,15 @@
 // ==UserScript==
-// @name       allegro.pl
-// @version    1
-// @namespace  https://github.com/kamilsarelo
-// @author     kamilsarelo
-// @icon       https://raw.githubusercontent.com/kamilsarelo/violentmonkey-userscripts/master/assets/allegro-logo.png
-// @include    *://allegro.pl/*
-// @include    *://*.allegro.pl/*
-// @include    *://allegro.com/*
-// @include    *://*.allegro.com/*
-// @grant      none
+// @name         allegro.pl
+// @description  Removes sponsored and promoted offers from Allegro search results
+// @namespace    https://github.com/kamilsarelo
+// @version      2
+// @author       kamilsarelo
+// @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey-userscripts/master/assets/allegro-logo.png
+// @match        *://allegro.pl/*
+// @match        *://*.allegro.pl/*
+// @match        *://allegro.com/*
+// @match        *://*.allegro.com/*
+// @grant        none
 // ==/UserScript==
 
 (function() {

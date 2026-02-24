@@ -1,13 +1,13 @@
 // ==UserScript==
-// @name           derStandard.at - Ad & Paywall Remover
-// @description    Removes advertisements, paywall modals, and promotional banners from derStandard.at. Auto-expands compact navbar and handles paywall bypass.
-// @version        27
-// @namespace      https://github.com/kamilsarelo
-// @author         kamilsarelo
-// @icon           https://raw.githubusercontent.com/kamilsarelo/violentmonkey-userscripts/master/assets/derstandard-logo.png
-// @include        *://derstandard.at/*
-// @include        *://*.derstandard.at/*
-// @grant          none
+// @name         derStandard.at - Ad & Paywall Remover
+// @description  Removes advertisements, paywall modals, and promotional banners from derStandard.at. Auto-expands compact navbar and handles paywall bypass.
+// @namespace    https://github.com/kamilsarelo
+// @version      28
+// @author       kamilsarelo
+// @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey-userscripts/master/assets/derstandard-logo.png
+// @match        *://derstandard.at/*
+// @match        *://*.derstandard.at/*
+// @grant        none
 // ==/UserScript==
 
 (function() {

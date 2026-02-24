@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         YouTube Background Playback
 // @description  Disable Page Visibility API to enable background playback on YouTube web
-// @version      2
 // @namespace    https://github.com/kamilsarelo
+// @version      3
 // @author       kamilsarelo
 // @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey-userscripts/master/assets/youtube-logo.png
 // @match        *://youtube.com/*

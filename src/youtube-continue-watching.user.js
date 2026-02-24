@@ -1,14 +1,14 @@
 // ==UserScript==
-// @name           YouTube Auto-Continue Watching
-// @description    Automatically dismisses the "Video paused. Continue watching?" dialog on YouTube, allowing uninterrupted playback
-// @version        4
-// @namespace      https://github.com/kamilsarelo
-// @author         kamilsarelo
-// @icon           https://raw.githubusercontent.com/kamilsarelo/violentmonkey-userscripts/master/assets/youtube-logo.png
-// @match          *://youtube.com/*
-// @match          *://*.youtube.com/*
-// @grant          none
-// @run-at         document-idle
+// @name         YouTube Auto-Continue Watching
+// @description  Automatically dismisses the "Video paused. Continue watching?" dialog on YouTube, allowing uninterrupted playback
+// @namespace    https://github.com/kamilsarelo
+// @version      5
+// @author       kamilsarelo
+// @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey-userscripts/master/assets/youtube-logo.png
+// @match        *://youtube.com/*
+// @match        *://*.youtube.com/*
+// @grant        none
+// @run-at       document-idle
 // ==/UserScript==
 
 function handleContinueWatchingDialog() {

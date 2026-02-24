@@ -1,14 +1,14 @@
 // ==UserScript==
 // @name         Allegro Sponsored/Promoted Highlighter
 // @description  Highlight sponsored and promoted articles on Allegro search results with a simple overlay
-// @version      31
 // @namespace    https://github.com/kamilsarelo
+// @version      32
 // @author       kamilsarelo
 // @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey-userscripts/master/assets/allegro-logo.png
-// @include      *://allegro.pl/*
-// @include      *://*.allegro.pl/*
-// @include      *://allegro.com/*
-// @include      *://*.allegro.com/*
+// @match        *://allegro.pl/*
+// @match        *://*.allegro.pl/*
+// @match        *://allegro.com/*
+// @match        *://*.allegro.com/*
 // @grant        none
 // ==/UserScript==
 

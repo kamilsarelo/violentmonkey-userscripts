@@ -1,14 +1,14 @@
 // ==UserScript==
-// @name           derStandard.at > Web - Section Remover
-// @description    Removes the chaotic section from derStandard.at/web page for a cleaner reading experience.
-// @version        3
-// @namespace      https://github.com/kamilsarelo
-// @author         kamilsarelo
-// @icon           https://raw.githubusercontent.com/kamilsarelo/violentmonkey-userscripts/master/assets/derstandard-logo.png
-// @include        *://derstandard.at/web
-// @include        *://*.derstandard.at/web
-// @grant          none
-// @run-at         document-start
+// @name         derStandard.at > Web - Section Remover
+// @description  Removes the chaotic section from derStandard.at/web page for a cleaner reading experience.
+// @namespace    https://github.com/kamilsarelo
+// @version      4
+// @author       kamilsarelo
+// @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey-userscripts/master/assets/derstandard-logo.png
+// @match        *://derstandard.at/web
+// @match        *://*.derstandard.at/web
+// @grant        none
+// @run-at       document-start
 // ==/UserScript==
 
 (function() {
