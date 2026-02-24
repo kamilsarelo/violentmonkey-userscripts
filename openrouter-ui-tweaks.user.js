@@ -1,14 +1,13 @@
 // ==UserScript==
 // @name         OpenRouter Wider Content
 // @description  Widens the main content area on openrouter.ai by modifying the .max-w-3xl class.
-// @namespace    https://github.com/kamilsarelo
 // @version      3
+// @namespace    https://github.com/kamilsarelo
 // @author       kamilsarelo
-// @update       https://github.com/kamilsarelo/violentmonkey/raw/master/openrouter.ai.user.js
 // @icon         https://openrouter.ai/favicon.ico
-// @grant        GM_addStyle
 // @include      *://openrouter.ai/*
-// @include      *://www.openrouter.ai/*
+// @include      *://*.openrouter.ai/*
+// @grant        GM_addStyle
 // ==/UserScript==
 
 (function() {

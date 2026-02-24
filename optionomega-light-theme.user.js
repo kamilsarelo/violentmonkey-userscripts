@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name         Option Omega Light Theme
 // @description  Convert Option Omega's default dark theme to light mode for better readability
-// @namespace    https://github.com/kamilsarelo
 // @version      4
+// @namespace    https://github.com/kamilsarelo
 // @author       kamilsarelo
-// @update       https://github.com/kamilsarelo/violentmonkey/raw/master/optionomega-light-theme.user.js
-// @match        https://optionomega.com/*
-// @match        https://www.optionomega.com/*
+// @icon         https://optionomega.com/favicon.png
+// @match        *://optionomega.com/*
+// @match        *://*.optionomega.com/*
 // @grant        GM_addStyle
 // @run-at       document-start
 // ==/UserScript==

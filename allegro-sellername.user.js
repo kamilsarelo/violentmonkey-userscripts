@@ -1,16 +1,15 @@
 // ==UserScript==
 // @name         Allegro Seller Name Replacement
 // @description  Replace seller type labels with actual seller names on Allegro search results, running periodically
-// @namespace    https://github.com/kamilsarelo
 // @version      15
+// @namespace    https://github.com/kamilsarelo
 // @author       kamilsarelo
-// @update       https://github.com/kamilsarelo/violentmonkey/raw/master/allegro.pl.sellername.user.js
-// @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
-// @grant        none
+// @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey-userscripts/master/allegro-logo.png
 // @include      *://allegro.pl/*
-// @include      *://www.allegro.pl/*
+// @include      *://*.allegro.pl/*
 // @include      *://allegro.com/*
-// @include      *://www.allegro.com/*
+// @include      *://*.allegro.com/*
+// @grant        none
 // ==/UserScript==
 
 (function() {

@@ -1,13 +1,12 @@
 // ==UserScript==
 // @name         Google AI Studio UI Tweaks
 // @description  Applies a background color to user prompts and the input area, and removes the separator line for a cleaner look.
-// @namespace    https://github.com/kamilsarelo
 // @version      4
+// @namespace    https://github.com/kamilsarelo
 // @author       kamilsarelo
-// @update       https://github.com/kamilsarelo/violentmonkey/raw/master/google_ai_studio.user.js
 // @icon         https://www.gstatic.com/aistudio/ai_studio_favicon_2_32x32.png
-// @grant        none
 // @include      *://aistudio.google.com/*
+// @grant        none
 // ==/UserScript==
 
 (function() {

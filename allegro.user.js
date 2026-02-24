@@ -1,15 +1,14 @@
 // ==UserScript==
 // @name       allegro.pl
-// @namespace  https://github.com/kamilsarelo
 // @version    1
+// @namespace  https://github.com/kamilsarelo
 // @author     kamilsarelo
-// @update     https://github.com/kamilsarelo/violentmonkey/raw/master/allegro.pl.user.js
-// @icon       https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/allegro.pl.logo.png
-// @grant      none
+// @icon       https://raw.githubusercontent.com/kamilsarelo/violentmonkey-userscripts/master/allegro-logo.png
 // @include    *://allegro.pl/*
-// @include    *://www.allegro.pl/*
+// @include    *://*.allegro.pl/*
 // @include    *://allegro.com/*
-// @include    *://www.allegro.com/*
+// @include    *://*.allegro.com/*
+// @grant      none
 // ==/UserScript==
 
 (function() {

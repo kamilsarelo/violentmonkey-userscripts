@@ -1,13 +1,12 @@
 // ==UserScript==
 // @name         Video Controller
 // @description  Adds video speed controls below videos with global speed persistence, keyboard shortcuts, and a wide range of speed options (0.1x-16x)
-// @namespace    https://github.com/kamilsarelo
 // @version      2
+// @namespace    https://github.com/kamilsarelo
 // @author       kamilsarelo
-// @update       https://github.com/kamilsarelo/violentmonkey/raw/master/video-controller.user.js
+// @match        *://*/*
 // @grant        GM_setValue
 // @grant        GM_getValue
-// @match        *://*/*
 // ==/UserScript==
 
 (function () {

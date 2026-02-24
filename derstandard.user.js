@@ -3,11 +3,10 @@
 // @version    26
 // @namespace  https://github.com/kamilsarelo
 // @author     kamilsarelo
-// @update     https://github.com/kamilsarelo/violentmonkey/raw/master/derStandard.at.user.js
-// @icon       https://raw.githubusercontent.com/kamilsarelo/violentmonkey/master/derStandard.at.logo.png
-// @grant      none
+// @icon       https://raw.githubusercontent.com/kamilsarelo/violentmonkey-userscripts/master/derstandard-logo.png
 // @include    *://derstandard.at/*
-// @include    *://www.derstandard.at/*
+// @include    *://*.derstandard.at/*
+// @grant      none
 // ==/UserScript==
 
 setInterval(function(){
