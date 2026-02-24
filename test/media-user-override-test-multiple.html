@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiple Media Test - Media User Override</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .back { display: block; margin-bottom: 20px; }
+        video, audio { width: 100%; background: #000; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <a class="back" href="/">← Back to Home</a>
+    <h1>Multiple Media Test</h1>
+    <p>Multiple media elements. Play each to switch active control.</p>
+    
+    <h3>Video 1</h3>
+    <video controls>
+        <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+    </video>
+    
+    <h3>Video 2</h3>
+    <video controls>
+        <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4" type="video/mp4">
+    </video>
+    
+    <h3>Audio</h3>
+    <audio controls>
+        <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="audio/mp4">
+    </audio>
+</body>
+</html>

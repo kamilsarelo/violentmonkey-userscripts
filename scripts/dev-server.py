@@ -36,6 +36,14 @@ DEV_PREFIX = "[DEV] "
 DEV_NAMESPACE_SUFFIX = "/dev"
 
 SCRIPTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src")
+TEST_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "test")
+
+TEST_PAGES = {
+    "media-user-override-test-basic.html": "Basic Video - Single video element",
+    "media-user-override-test-audio.html": "Audio - Single audio element",
+    "media-user-override-test-multiple.html": "Multiple - Multiple media elements",
+    "media-user-override-test-short.html": "Short Media - Media &lt;5s (ignored)",
+}
 
 
 def get_local_ip():
@@ -113,10 +121,17 @@ class DevHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         url_path = self.path.split("?")[0]
 
-        # Serve index page listing all scripts
+        # Serve index page listing all scripts and tests
         if url_path == "/" or url_path == "/index.html":
             self.serve_index()
             return
+
+        # Serve test pages
+        if url_path.endswith(".html") and url_path.lstrip("/") in TEST_PAGES:
+            filepath = os.path.join(TEST_DIR, url_path.lstrip("/"))
+            if os.path.exists(filepath):
+                self.serve_test_page(filepath)
+                return
 
         # Serve modified userscript
         if url_path.endswith(".user.js"):
@@ -134,32 +149,38 @@ class DevHandler(http.server.SimpleHTTPRequestHandler):
         super().do_GET()
 
     def serve_index(self):
-        """Serve index page with list of available scripts."""
+        """Serve index page with list of available scripts and test pages."""
+        test_links = ''.join(f'<li><a href="/{f}">{TEST_PAGES[f]}</a></li>' for f in TEST_PAGES)
         html = f"""<!DOCTYPE html>
 <html>
 <head>
     <title>Dev Userscripts</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
-        body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }}
-        h1 {{ color: #333; }}
+        body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; font-size: 14px; }}
+        h1, h2 {{ color: #333; }}
         ul {{ list-style: none; padding: 0; }}
-        li {{ margin: 10px 0; padding: 15px; background: #f5f5f5; border-radius: 8px; }}
+        li {{ margin: 8px 0; padding: 12px 15px; background: #f5f5f5; border-radius: 8px; }}
         a {{ text-decoration: none; color: #0066cc; font-weight: 500; }}
         a:hover {{ text-decoration: underline; }}
-        small {{ color: #666; }}
         .info {{ background: #e7f3ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; }}
         code {{ background: #eee; padding: 2px 6px; border-radius: 4px; }}
+        .section {{ margin-top: 30px; }}
     </style>
 </head>
 <body>
     <h1>🔧 Dev Userscripts</h1>
     <div class="info">
-        <p>Install these URLs in your userscript manager on any device in your network.</p>
-        <p>Scripts are served with <code>[DEV]</code> prefix to coexist with production versions.</p>
+        <p>Install scripts in your userscript manager. Served with <code>[DEV]</code> prefix.</p>
     </div>
     <ul>
         {''.join(f'<li><a href="/{s}">{s}</a></li>' for s in get_scripts())}
     </ul>
+    
+    <div class="section">
+        <h2>🧪 Test Pages</h2>
+        <ul>{test_links}</ul>
+    </div>
 </body>
 </html>"""
 
@@ -182,6 +203,19 @@ class DevHandler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(content.encode("utf-8"))
         except Exception as e:
             self.send_error(500, f"Error processing script: {e}")
+
+    def serve_test_page(self, filepath):
+        """Serve test page HTML file."""
+        try:
+            with open(filepath, "r", encoding="utf-8") as f:
+                content = f.read()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_no_cache_headers()
+            self.end_headers()
+            self.wfile.write(content.encode("utf-8"))
+        except Exception as e:
+            self.send_error(500, f"Error serving test page: {e}")
 
     def log_message(self, format, *args):
         """Custom logging format with version for userscripts."""
