@@ -2,7 +2,7 @@
 // @name         YouTube Auto-Continue Watching
 // @description  Automatically dismisses the "Video paused. Continue watching?" dialog on YouTube, allowing uninterrupted playback
 // @namespace    https://github.com/kamilsarelo
-// @version      6
+// @version      7
 // @author       kamilsarelo
 // @icon         https://raw.githubusercontent.com/kamilsarelo/violentmonkey-userscripts/master/assets/youtube-logo.png
 // @match        *://youtube.com/*
@@ -15,49 +15,56 @@
   'use strict';
 
   /**
-   * Attempts to close a dialog by clicking buttons with aria-label.
-   * First tries the direct button, then traverses up to parent elements
-   * with "button" in their tag name.
+   * Handles the "Video paused. Continue watching?" dialog by:
+   * 1. Finding the text element with the distinctive message
+   * 2. Traversing to its parent dialog
+   * 3. Clicking the "Yes" button (with fallback to parent elements)
    */
   function handleContinueWatchingDialog() {
-    // Find all dialogs with role="dialog"
-    const dialogs = document.querySelectorAll('[role="dialog"]');
+    // Use XPath to find the text directly
+    const xpath = "//yt-formatted-string[contains(text(), 'Video paused. Continue watching?')]";
+    const textEl = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
 
-    for (const dialog of dialogs) {
-      // Find all buttons with aria-label inside this dialog
-      const buttons = dialog.querySelectorAll('button[aria-label]');
+    if (!textEl) return;
 
-      // Only proceed if there's exactly one button with aria-label
-      // This prevents clicking on dialogs with multiple options (e.g., Yes/No)
-      if (buttons.length !== 1) {
-        continue;
-      }
-
-      const button = buttons[0];
-
-      // Try clicking the button directly
-      button.click();
-
-      // Check if dialog closed
-      if (!document.body.contains(dialog)) {
-        return; // Success, dialog is gone
-      }
-
-      // Fallback: traverse up clicking parent elements with "button" in tag name
-      let parent = button.parentElement;
-      while (parent && dialog.contains(parent)) {
-        const tagName = parent.tagName.toLowerCase();
-        if (tagName.includes('button')) {
-          parent.click();
-
-          // Check if dialog closed after clicking parent
-          if (!document.body.contains(dialog)) {
-            return; // Success, dialog is gone
-          }
-        }
-        parent = parent.parentElement;
-      }
+    const dialog = textEl.closest('[role="dialog"]');
+    if (!dialog) {
+      console.error('[YouTube Auto-Continue] Text found but no parent dialog');
+      return;
     }
+
+    // Find button with aria-label="Yes"
+    const button = dialog.querySelector('button[aria-label="Yes"]');
+    if (!button) {
+      console.error('[YouTube Auto-Continue] Dialog found but no "Yes" button');
+      return;
+    }
+
+    // Helper to check if dialog is closed
+    const isDialogClosed = () => !document.body.contains(dialog);
+
+    // Helper to wait for dialog to close
+    const waitForClose = (thresholdMs = 100) => new Promise(resolve => {
+      setTimeout(() => resolve(isDialogClosed()), thresholdMs);
+    });
+
+    // Click cascade: button -> parent -> parent's parent -> abort
+    (async () => {
+      let element = button;
+      let depth = 0;
+      const maxDepth = 2; // button, parent, grandparent
+
+      while (element && depth <= maxDepth) {
+        element.click();
+
+        if (await waitForClose()) return; // Success
+
+        depth++;
+        element = element.parentElement;
+      }
+
+      console.error('[YouTube Auto-Continue] Failed to close dialog after clicking button and parents');
+    })();
   }
 
   // Observe DOM changes to detect dialog appearance
