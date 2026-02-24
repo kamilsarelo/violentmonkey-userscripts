@@ -6,6 +6,18 @@ A curated collection of userscripts designed to enhance and customize your web b
 
 Userscripts are small JavaScript programs that run on specific websites, allowing you to modify pages, add features, remove annoyances, and tailor the web to your needs.
 
+## Repository Structure
+
+```
+violentmonkey-userscripts/
+├── README.md
+├── LICENSE
+├── .gitignore
+├── scripts/           # Development tools
+├── assets/            # Images and icons
+└── src/               # Userscripts
+```
+
 ## Requirements
 
 To use these scripts, you'll need a userscript manager browser extension:
@@ -22,10 +34,32 @@ To use these scripts, you'll need a userscript manager browser extension:
 ## Installation
 
 1. Install a userscript manager (see above)
-2. Browse the scripts in this repository
+2. Browse the scripts in the [`src/`](src/) directory
 3. Click on any `.user.js` file, then click "Raw"
 4. The userscript manager will prompt you to install it
 5. Done! The script will run automatically on matching websites and update when changes are pushed
+
+## Development
+
+### Local Testing with Dev Server
+
+A development server is included for testing scripts across devices on your local network before pushing to GitHub.
+
+**Usage:**
+
+```bash
+python3 scripts/dev-server.py
+```
+
+Then open `http://<your-local-ip>:8080` on any device in your network to see available scripts.
+
+**Features:**
+- Adds `[DEV]` prefix to script names (coexists with production scripts)
+- Modifies `@namespace` to distinguish from production
+- Uses milliseconds since epoch as `@version` (always increases)
+- CORS enabled for userscript manager update checks
+
+**Requirements:** Python 3.7+ (standard library only)
 
 ## License
 

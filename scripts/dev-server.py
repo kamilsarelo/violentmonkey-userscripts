@@ -35,7 +35,7 @@ PORT = 8080
 DEV_PREFIX = "[DEV] "
 DEV_NAMESPACE_SUFFIX = "/dev"
 
-SCRIPTS_DIR = os.path.dirname(os.path.abspath(__file__))
+SCRIPTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src")
 
 
 def get_local_ip():

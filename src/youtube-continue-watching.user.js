@@ -4,7 +4,7 @@
 // @version        4
 // @namespace      https://github.com/kamilsarelo
 // @author         kamilsarelo
-// @icon           https://raw.githubusercontent.com/kamilsarelo/violentmonkey-userscripts/master/youtube-logo.png
+// @icon           https://raw.githubusercontent.com/kamilsarelo/violentmonkey-userscripts/master/assets/youtube-logo.png
 // @match          *://youtube.com/*
 // @match          *://*.youtube.com/*
 // @grant          none

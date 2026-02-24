@@ -3,7 +3,7 @@
 // @version    1
 // @namespace  https://github.com/kamilsarelo
 // @author     kamilsarelo
-// @icon       https://raw.githubusercontent.com/kamilsarelo/violentmonkey-userscripts/master/derstandard-logo.png
+// @icon       https://raw.githubusercontent.com/kamilsarelo/violentmonkey-userscripts/master/assets/derstandard-logo.png
 // @include    *://derstandard.at/web
 // @include    *://*.derstandard.at/web
 // @grant      none

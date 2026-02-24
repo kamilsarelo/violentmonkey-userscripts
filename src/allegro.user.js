@@ -3,7 +3,7 @@
 // @version    1
 // @namespace  https://github.com/kamilsarelo
 // @author     kamilsarelo
-// @icon       https://raw.githubusercontent.com/kamilsarelo/violentmonkey-userscripts/master/allegro-logo.png
+// @icon       https://raw.githubusercontent.com/kamilsarelo/violentmonkey-userscripts/master/assets/allegro-logo.png
 // @include    *://allegro.pl/*
 // @include    *://*.allegro.pl/*
 // @include    *://allegro.com/*
